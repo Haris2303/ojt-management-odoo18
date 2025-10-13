@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <menuitem 
+            id="menu_ojt_root"
+            name="OJT Management"
+            web_icon="solvera_ojt_core,static/description/icon.png"
+            sequence="1"/>
+        
+        <menuitem
+            id="menu_ojt_batch"
+            name="Batches"
+            action="action_ojt_batch"
+            parent="menu_ojt_root"
+            sequence="1"/>
+
+        <menuitem
+            id="menu_ojt_attendance"
+            name="Attendance"
+            action="action_ojt_attendance"
+            parent="menu_ojt_root"
+            sequence="3"/>
+
+        <menuitem
+            id="menu_ojt_reporting_submenu"
+            name="Reports"
+            parent="menu_ojt_root"
+            sequence="4"/>
+
+    </data>
+</odoo>

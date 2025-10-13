@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="event_event_view_form_inherit_ojt" model="ir.ui.view">
+            <field name="name">event.event.form.inherit.ojt</field>
+            <field name="model">event.event</field>
+            <field name="inherit_id" ref="event.view_event_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='address_id']" position="after">
+                    <field name="online_meeting_url" widget="url" placeholder="e.g. https://meet.google.com/xxx-xxx-xxx"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

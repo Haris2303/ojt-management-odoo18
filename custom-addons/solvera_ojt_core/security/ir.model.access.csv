@@ -1,0 +1,42 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+access_ojt_batch_manager,ojt.batch manager access,model_ojt_batch,solvera_ojt_core.ojt_group_manager,1,1,1,1
+access_ojt_batch_coordinator,ojt.batch coordinator access,model_ojt_batch,solvera_ojt_core.ojt_group_coordinator,1,1,1,1
+access_ojt_batch_mentor,ojt.batch mentor access,model_ojt_batch,solvera_ojt_core.ojt_group_mentor,1,0,0,0
+access_ojt_batch_viewer,ojt.batch viewer access,model_ojt_batch,solvera_ojt_core.ojt_group_viewer,1,0,0,0
+
+access_ojt_participant_manager,ojt.participant manager access,model_ojt_participant,solvera_ojt_core.ojt_group_manager,1,1,1,1
+access_ojt_participant_coordinator,ojt.participant coordinator access,model_ojt_participant,solvera_ojt_core.ojt_group_coordinator,1,1,1,0
+access_ojt_participant_mentor,ojt.participant mentor access,model_ojt_participant,solvera_ojt_core.ojt_group_mentor,1,1,0,0
+access_ojt_participant_viewer,ojt.participant viewer access,model_ojt_participant,solvera_ojt_core.ojt_group_viewer,1,0,0,0
+
+access_ojt_event_link_manager,ojt.event.link manager access,model_ojt_event_link,solvera_ojt_core.ojt_group_manager,1,1,1,1
+access_ojt_event_link_coordinator,ojt.event.link coordinator access,model_ojt_event_link,solvera_ojt_core.ojt_group_coordinator,1,1,1,1
+access_ojt_event_link_mentor,ojt.event.link mentor access,model_ojt_event_link,solvera_ojt_core.ojt_group_mentor,1,0,0,0
+access_ojt_event_link_viewer,ojt.event.link viewer access,model_ojt_event_link,solvera_ojt_core.ojt_group_viewer,1,0,0,0
+
+access_ojt_certificate_manager,ojt.certificate manager access,model_ojt_certificate,solvera_ojt_core.ojt_group_manager,1,1,1,1
+access_ojt_certificate_coordinator,ojt.certificate coordinator access,model_ojt_certificate,solvera_ojt_core.ojt_group_coordinator,1,1,1,0
+access_ojt_certificate_viewer,ojt.certificate viewer access,model_ojt_certificate,solvera_ojt_core.ojt_group_viewer,1,0,0,0
+
+access_ojt_assignment_manager,ojt.assignment manager access,model_ojt_assignment,solvera_ojt_core.ojt_group_manager,1,1,1,1
+access_ojt_assignment_mentor,ojt.assignment mentor access,model_ojt_assignment,solvera_ojt_core.ojt_group_mentor,1,1,1,0
+access_ojt_assignment_viewer,ojt.assignment viewer access,model_ojt_assignment,solvera_ojt_core.ojt_group_viewer,1,0,0,0
+
+access_ojt_assignment_submit_manager,ojt.assignment.submit manager access,model_ojt_assignment_submit,solvera_ojt_core.ojt_group_manager,1,1,1,1
+access_ojt_assignment_submit_mentor,ojt.assignment.submit mentor access,model_ojt_assignment_submit,solvera_ojt_core.ojt_group_mentor,1,1,1,0
+access_ojt_assignment_submit_viewer,ojt.assignment.submit viewer access,model_ojt_assignment_submit,solvera_ojt_core.ojt_group_viewer,1,0,0,0
+
+access_ojt_attendance_manager,ojt.attendance manager access,model_ojt_attendance,solvera_ojt_core.ojt_group_manager,1,1,1,1
+access_ojt_attendance_mentor,ojt.attendance mentor access,model_ojt_attendance,solvera_ojt_core.ojt_group_mentor,1,1,1,0
+access_ojt_attendance_viewer,ojt.attendance viewer access,model_ojt_attendance,solvera_ojt_core.ojt_group_viewer,1,0,0,0
+
+access_ojt_participant_portal_user,ojt.participant portal user access,model_ojt_participant,base.group_portal,1,0,0,0
+access_ojt_batch_portal_user,ojt.batch portal user access,model_ojt_batch,base.group_portal,1,0,0,0
+access_ojt_assignment_submit_portal_user,ojt.assignment.submit for portal user,model_ojt_assignment_submit,base.group_portal,1,1,1,0
+access_ojt_assignment_portal_user,ojt.assignment for portal user,model_ojt_assignment,base.group_portal,1,0,0,0
+access_ojt_event_link_portal_user,ojt.event.link for portal user,model_ojt_event_link,base.group_portal,1,0,0,0
+access_event_event_portal_user,event.event for portal user,event.model_event_event,base.group_portal,1,0,0,0
+access_ir_attachment_portal_user,ir.attachment for portal user,base.model_ir_attachment,base.group_portal,1,0,1,0
+access_ojt_certificate_portal_user,ojt.certificate for portal user,model_ojt_certificate,base.group_portal,1,0,0,0
+access_ojt_batch_public,ojt.batch for public user,model_ojt_batch,base.group_public,1,0,0,0
+access_ojt_generate_certificates_wizard_manager,ojt.generate.certificates.wizard for manager,model_ojt_generate_certificates_wizard,solvera_ojt_core.ojt_group_manager,1,1,1,1

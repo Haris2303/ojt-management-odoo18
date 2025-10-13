@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="ojt_batch_list_view" model="ir.ui.view">
+            <field name="name">ojt.batch.list</field>
+            <field name="model">ojt.batch</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="state" widget="badge"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="ojt_batch_form_view" model="ir.ui.view">
+            <field name="name">ojt.batch.form</field>
+            <field name="model">ojt.batch</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_open_generate_certificates_wizard" string="Generate Certificates" type="object" class="oe_highlight" invisible="state != 'done'"/>
+                        <button name="action_recruit" string="Start Recruitment" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                        <button name="action_ongoing" string="Start Program" type="object" class="oe_highlight" invisible="state != 'recruit'"/>
+                        <button name="action_done" string="Mark as Done" type="object" class="oe_highlight" invisible="state != 'ongoing'"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,recruit,ongoing,done"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="%(solvera_ojt_core.action_ojt_participant)s" type="action" class="oe_stat_button" icon="fa-users">
+                                <field name="participant_count" widget="statinfo" string="Participants"/>
+                            </button>
+                            <button name="%(solvera_ojt_core.action_ojt_event_link)s" type="action" class="oe_stat_button" icon="fa-calendar">
+                                <field name="event_link_count" widget="statinfo" string="Agenda"/>
+                            </button>
+                        </div>
+                        <div class="oe_title">
+                            <h1><field name="name"/></h1>
+                            <h2><field name="code" readonly="1"/></h2>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="job_id"/>
+                                <field name="department_id"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="mentor_ids" widget="many2many_tags"/>
+                            </group>
+                            <group>
+                                <field name="start_date"/>
+                                <field name="end_date"/>
+                                <field name="mode"/>
+                                <field name="capacity"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Participants">
+                                <field name="participant_ids">
+                                    <list>
+                                        <field name="partner_id"/>
+                                        <field name="state"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Agenda/Events">
+                                <field name="event_link_ids">
+                                    <list>
+                                        <field name="event_id" />
+                                        <field name="is_mandatory" />
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Description">
+                                <field name="description"/>
+                            </page>
+                            <page string="Certificate Rules">
+                                <group>
+                                    <field name="certificate_rule_attendance"/>
+                                    <field name="certificate_rule_score"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="ojt_batch_kanban_view" model="ir.ui.view">
+            <field name="name">ojt.batch.kanban</field>
+            <field name="model">ojt.batch</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="state">
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                    <field name="participant_count"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <strong><field name="name"/></strong>
+                                <div><small><field name="code"/></small></div>
+                                <div><field name="start_date"/> - <field name="end_date"/></div>
+                                <div><field name="participant_count"/> Participants</div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="action_ojt_batch" model="ir.actions.act_window">
+            <field name="name">OJT Batches</field>
+            <field name="res_model">ojt.batch</field>
+            <field name="view_mode">kanban,list,form</field>
+        </record>
+    </data>
+</odoo>

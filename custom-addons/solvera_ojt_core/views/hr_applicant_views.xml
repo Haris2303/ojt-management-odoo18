@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="hr_applicant_view_form_inherit_ojt" model="ir.ui.view">
+            <field name="name">hr.applicant.form.inherit.ojt</field>
+            <field name="model">hr.applicant</field>
+            <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="inside">
+                    <button name="%(solvera_ojt_core.action_hr_applicant_enroll_wizard)s"
+                            string="Enroll to OJT"
+                            type="action"
+                            class="oe_highlight"
+                            invisible="stage_id.is_won == False"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

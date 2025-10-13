@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_ojt_certificate_document">
+        <t t-call="web.basic_layout">
+            <div class="page" style="font-family: 'Helvetica', sans-serif; padding: 40px; border: 10px solid #00A09D; height: 100%;">
+                <t t-foreach="docs" t-as="doc">
+                    <div class="text-center">
+                        <h1 style="color: #00A09D; font-size: 48px; font-weight: bold; margin-top: 60px;">Certificate of Completion</h1>
+                        
+                        <p style="font-size: 18px; margin-top: 40px;">This certificate is awarded to</p>
+                        
+                        <h2 style="font-size: 36px; font-weight: bold; margin-top: 20px; border-bottom: 2px solid #333; display: inline-block; padding-bottom: 5px;">
+                            <t t-if="doc.participant_id and doc.participant_id.partner_id">
+                                <t t-esc="doc.participant_id.partner_id.name"/>
+                            </t>
+                        </h2>
+                        
+                        <p style="font-size: 18px; margin-top: 40px;">
+                            For successfully completing the On-the-Job Training Program
+                        </p>
+                        
+                        <h3 style="font-size: 28px; font-weight: bold; color: #00A09D; margin-top: 20px;">
+                            <t t-if="doc.batch_id">
+                                "<t t-esc="doc.batch_id.name"/>"
+                            </t>
+                        </h3>
+                        
+                        <p style="font-size: 16px; margin-top: 50px;">
+                            <t t-if="doc.issued_on">
+                                Issued on: <span t-esc="doc.issued_on.strftime('%B %d, %Y')"/>
+                            </t>
+                        </p>
+                        
+                        <div style="margin-top: 80px; display: flex; justify-content: space-around; text-align: center;">
+                            <div>
+                                <p t-if="doc.final_score or doc.final_score == 0"><strong>Final Score:</strong> <t t-esc="'%.2f' % doc.final_score"/></p>
+                                <p t-if="doc.grade"><strong>Grade:</strong> <t t-esc="doc.grade"/></p>
+                            </div>
+                            <div>
+                                <p t-if="doc.attendance_rate or doc.attendance_rate == 0"><strong>Attendance:</strong> <t t-esc="'%.1f' % doc.attendance_rate"/>%</p>
+                            </div>
+                            <div>
+                                <t t-if="doc.serial">Serial Number: <t t-esc="doc.serial"/></t>
+                            </div>
+                            <div>
+                                <img t-if="doc.qr_code_image" t-att-src="f'data:image/png;base64,{doc.qr_code_image.decode()}'" style="width: 100px; height: 100px;"/>
+                                <p t-if="doc.qr_code_image" style="font-size: 10px; text-align: center; margin-top: 5px;">Scan to Verify</p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="ojt_participant_view_tree_for_wizard" model="ir.ui.view">
+        <field name="name">ojt.participant.tree.for.wizard</field>
+        <field name="model">ojt.participant</field>
+        <field name="arch" type="xml">
+            <list create="false" delete="false" edit="false">
+                <field name="name" string="Participant"/>
+                <field name="state"/>
+                <field name="attendance_rate"/>
+                <field name="score_final"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="ojt_generate_certificates_wizard_form_view" model="ir.ui.view">
+        <field name="name">ojt.generate.certificates.wizard.form.view</field>
+        <field name="model">ojt.generate.certificates.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <p>
+                    Akan dibuat <strong><field name="participant_count" class="oe_inline"/></strong> sertifikat untuk peserta yang memenuhi syarat.
+                    <br/>
+                    Syarat: Status 'Completed', Kehadiran &gt;= <field name="batch_id" nolabel="1" readonly="1" field_options='{"no_open": True}' widget="related" related_field="certificate_rule_attendance"/>%, dan Nilai Akhir &gt;= <field name="batch_id" nolabel="1" readonly="1" field_options='{"no_open": True}' widget="related" related_field="certificate_rule_score"/>.
+                </p>
+                <group>
+                    <field name="eligible_participant_ids"
+                            nolabel="1"
+                            context="{'tree_view_ref': 'solvera_ojt_core.ojt_participant_view_tree_for_wizard'}"/>
+                </group>
+                <group>
+                    <field name="overwrite_existing"/>
+                </group>
+                <footer>
+                    <button name="action_generate_certificates" string="Generate Certificates" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="ojt_generate_certificates_action" model="ir.actions.act_window">
+        <field name="name">Generate Certificates</field>
+        <field name="res_model">ojt.generate.certificates.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

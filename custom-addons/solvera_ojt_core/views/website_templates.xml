@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="ojt_program_list_template" name="OJT Program List">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container py-5">
+                    <div class="mb-4">
+                        <h1>Program OJT Tersedia</h1>
+                        <p class="lead">Temukan program On-the-Job Training yang sesuai untuk Anda.</p>
+                    </div>
+
+                    <div class="row">
+                        <t t-if="not batches">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    Saat ini belum ada program OJT yang dibuka.
+                                </div>
+                            </div>
+                        </t>
+
+                        <div t-foreach="batches" t-as="batch" class="col-lg-4 mb-4 d-flex align-items-stretch">
+                            <div class="card w-100">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title"><t t-esc="batch.name"/></h5>
+                                    <p class="card-text text-muted flex-grow-1">
+                                        <i class="fa fa-calendar-o mr-2"/>
+                                        <span t-field="batch.start_date" t-options='{"format": "dd MMM"}'/> - 
+                                        <span t-field="batch.end_date" t-options='{"format": "dd MMM yyyy"}'/>
+                                    </p>
+                                    <div class="mt-auto">
+                                        <span t-if="batch.state == 'recruit'" class="badge badge-success">Recruitment Open</span>
+                                        <span t-if="batch.state == 'ongoing'" class="badge badge-info">Ongoing</span>
+                                        <a href="#" class="btn btn-secondary btn-sm float-right">Lihat Detail</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="ojt_certificate_verification_page" name="OJT Certificate Verification">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container py-5">
+                    <div class="col-md-8 mx-auto">
+                        
+                        <t t-if="certificate">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h4 class="mb-0"><i class="fa fa-check-circle"/> Sertifikat Terverifikasi</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p class="lead">Sertifikat ini valid dan terdaftar dalam sistem kami dengan detail sebagai berikut:</p>
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="width: 30%;">Nama Peserta</th>
+                                            <td><t t-esc="certificate.participant_id.partner_id.name"/></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Program OJT</th>
+                                            <td><t t-esc="certificate.batch_id.name"/></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Nomor Serial</th>
+                                            <td><t t-esc="certificate.serial"/></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tanggal Terbit</th>
+                                            <td><span t-esc="certificate.issued_on.strftime('%d %B %Y')"/></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Nilai Akhir / Grade</th>
+                                            <td><t t-esc="certificate.final_score"/> / <t t-esc="certificate.grade"/></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </t>
+
+                        <t t-else="">
+                            <div class="card border-danger">
+                                <div class="card-header bg-danger text-white">
+                                    <h4 class="mb-0"><i class="fa fa-times-circle"/> Verifikasi Gagal</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p class="lead">Token verifikasi tidak valid atau sertifikat tidak ditemukan dalam sistem kami.</p>
+                                    <p>Pastikan Anda menggunakan link yang benar dari QR Code yang tertera pada sertifikat.</p>
+                                </div>
+                            </div>
+                        </t>
+
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <record id="menu_ojt_programs" model="website.menu">
+        <field name="name">OJT Programs</field>
+        <field name="url">/ojt/programs</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" type="int">50</field>
+    </record>
+</odoo>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="hr_applicant_enroll_wizard_form_view" model="ir.ui.view">
+            <field name="name">hr.applicant.enroll.wizard.form</field>
+            <field name="model">hr.applicant.enroll.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="batch_id"/>
+                    </group>
+                    <footer>
+                        <button name="action_enroll" string="Enroll" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_hr_applicant_enroll_wizard" model="ir.actions.act_window">
+            <field name="name">Enroll to OJT</field>
+            <field name="res_model">hr.applicant.enroll.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="hr_recruitment.model_hr_applicant"/>
+            <field name="binding_view_types">form</field>
+        </record>
+    </data>
+</odoo>
