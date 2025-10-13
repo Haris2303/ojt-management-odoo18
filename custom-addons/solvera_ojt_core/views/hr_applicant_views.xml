@@ -7,13 +7,30 @@
             <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//header" position="inside">
-                    <button name="%(solvera_ojt_core.action_hr_applicant_enroll_wizard)s"
-                            string="Enroll to OJT"
-                            type="action"
-                            class="oe_highlight"
-                            invisible="stage_id.is_won == False"/>
+                    <button name="action_open_enroll_wizard"
+                            string="Enroll to OJT" type="object" class="oe_highlight"
+                            invisible="[('stage_id.is_won', '=', False)]"/>
                 </xpath>
             </field>
+        </record>
+
+        <record id="action_hr_applicant_enroll_wizard_server" model="ir.actions.server">
+            <field name="name">Enroll Applicant to OJT</field>
+            <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+            <field name="binding_model_id" ref="hr_recruitment.model_hr_applicant"/>
+            <field name="binding_view_types">list,form</field>
+            <field name="state">code</field>
+            <field name="code"><![CDATA[
+action = model.env['ir.actions.act_window']._for_xml_id('solvera_ojt_core.action_hr_applicant_enroll_wizard_window')
+action['context'] = {'default_applicant_ids': active_ids}
+]]></field>
+        </record>
+
+        <record id="action_hr_applicant_enroll_wizard_window" model="ir.actions.act_window">
+            <field name="name">Enroll to OJT Batch</field>
+            <field name="res_model">hr.applicant.enroll.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
         </record>
     </data>
 </odoo>
