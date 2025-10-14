@@ -135,6 +135,31 @@
                         </ul>
                     </div>
                 </div>
+
+                <hr class="mt-5"/>
+                <h3>Survei &amp; Evaluasi</h3>
+                <div class="list-group mt-3">
+                    <t t-if="not surveys">
+                        <div class="list-group-item">Belum ada survei yang tersedia.</div>
+                    </t>
+                    <t t-foreach="survey_data" t-as="s_data">
+                        <div t-if="s_data['is_done']" class="list-group-item d-flex justify-content-between align-items-center bg-light">
+                            <div>
+                                <h6 class="mb-1 text-muted"><t t-esc="s_data['survey'].title"/></h6>
+                                <small class="text-muted">Anda sudah menyelesaikan survei ini.</small>
+                            </div>
+                            <span class="badge badge-success badge-pill"><i class="fa fa-check"/> Selesai</span>
+                        </div>
+
+                        <a t-else="" t-att-href="s_data['survey'].get_start_url()" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" target="_blank">
+                            <div>
+                                <h6 class="mb-1"><t t-esc="s_data['survey'].title"/></h6>
+                                <small class="text-muted">Klik untuk memulai</small>
+                            </div>
+                            <span class="badge badge-primary badge-pill">Mulai Survei</span>
+                        </a>
+                    </t>
+                </div>
             </div>
         </t>
     </template>

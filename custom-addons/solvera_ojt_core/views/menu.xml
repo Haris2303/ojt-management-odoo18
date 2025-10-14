@@ -15,39 +15,45 @@
             parent="menu_ojt_root"
             sequence="1"/>
 
+        <menuitem id="menu_ojt_participant"
+            name="Participants"
+            parent="menu_ojt_root"
+            sequence="2"
+            action="action_ojt_participant"/>
+
         <menuitem
             id="ojt_assignment_menu"
             name="Assignments"
             parent="menu_ojt_root" 
             action="ojt_assignment_action"
-            sequence="2"/>
+            sequence="3"/>
 
         <menuitem
             id="ojt_assignment_submit_menu"
             name="Submissions"
             parent="menu_ojt_root" 
             action="ojt_assignment_submit_action"
-            sequence="3"/>
+            sequence="4"/>
 
         <menuitem
             id="menu_ojt_attendance"
             name="Attendance"
             action="action_ojt_attendance"
             parent="menu_ojt_root"
-            sequence="4"/>
+            sequence="5"/>
 
         <menuitem
             id="ojt_certificate_menu"
             name="Certificates"
             parent="menu_ojt_root"
             action="ojt_certificate_action"
-            sequence="5"/>
+            sequence="6"/>
 
         <menuitem
             id="menu_ojt_reporting_submenu"
             name="Reports"
             parent="menu_ojt_root"
-            sequence="6"/>
+            sequence="7"/>
 
         <!-- Sub menu reporting -->
         <menuitem

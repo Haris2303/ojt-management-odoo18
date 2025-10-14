@@ -53,6 +53,8 @@ class OjtBatch(models.Model):
     certificate_rule_score = fields.Float(string='Min. Final Score', default=70.0)
     
     progress_ratio = fields.Float(string='Average Progress', compute='_compute_progress_ratio', store=True)
+
+    survey_id = fields.Many2one('survey.survey', string='Evaluation Survey')
     
     color = fields.Integer(string='Color Index')
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company, required=True)
@@ -129,3 +131,18 @@ class OjtBatch(models.Model):
             'target': 'new',
             'context': {'default_batch_id': self.id}
         }
+
+    def action_view_participants(self):
+        self.ensure_one()
+        # Mengembalikan action yang sudah ada di ojt_participant_views.xml
+        action = self.env['ir.actions.act_window']._for_xml_id('solvera_ojt_core.action_ojt_participant_from_batch')
+        # Kita tidak perlu menambahkan domain/context lagi karena sudah ada di action aslinya
+        return action
+
+    def action_view_agenda(self):
+        self.ensure_one()
+        # Mengembalikan action yang kemungkinan ada di ojt_event_link_views.xml
+        action = self.env['ir.actions.act_window']._for_xml_id('solvera_ojt_core.action_ojt_event_link')
+        action['domain'] = [('batch_id', '=', self.id)]
+        action['context'] = {'default_batch_id': self.id}
+        return action

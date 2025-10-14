@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+
         <record id="ojt_participant_list_view" model="ir.ui.view">
             <field name="name">ojt.participant.list</field>
             <field name="model">ojt.participant</field>
@@ -21,7 +22,28 @@
             <field name="model">ojt.participant</field>
             <field name="arch" type="xml">
                 <form>
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible="active,completed,failed"/>
+                    </header>
                     <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_open_assignments" type="object" class="oe_stat_button" icon="fa-tasks">
+                                <span class="o_stat_text">Assignments</span>
+                            </button>
+                            <button name="action_open_attendance" type="object" class="oe_stat_button" icon="fa-calendar-check-o">
+                                <field name="attendance_count" widget="statinfo" string="Attendances"/>
+                            </button>
+                            <button name="action_open_certificates" type="object" class="oe_stat_button" icon="fa-certificate">
+                                <span class="o_stat_text">Certificates</span>
+                            </button>
+                            <button name="action_open_courses" type="object" class="oe_stat_button" icon="fa-book" invisible="course_count == 0">
+                                <field name="course_count" widget="statinfo" string="Courses"/>
+                            </button>
+                            <button name="action_open_survey_results" type="object" class="oe_stat_button" icon="fa-question-circle" invisible="survey_count == 0">
+                                <field name="survey_count" widget="statinfo" string="Surveys"/>
+                            </button>
+                        </div>
+                        
                         <group>
                             <group>
                                 <field name="partner_id"/>
@@ -29,14 +51,13 @@
                                 <field name="applicant_id"/>
                             </group>
                             <group>
-                                <field name="state"/>
-                                <field name="attendance_rate"/>
+                                <field name="attendance_rate" readonly="1" widget="percentage"/>
+                                <field name="score_final" readonly="1"/>
+                                <field name="mentor_score"/>
                             </group>
                         </group>
-                        <group string="Scores">
-                            <field name="score_avg" readonly="1"/>
-                            <field name="score_final" readonly="1"/>
-                        </group>
+                        <notebook>
+                            </notebook>
                     </sheet>
                 </form>
             </field>
@@ -46,8 +67,17 @@
             <field name="name">OJT Participants</field>
             <field name="res_model">ojt.participant</field>
             <field name="view_mode">list,form</field>
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+        </record>
+
+        <!-- khusus smart button di batch -->
+        <record id="action_ojt_participant_from_batch" model="ir.actions.act_window">
+            <field name="name">Participants by Batch</field>
+            <field name="res_model">ojt.participant</field>
+            <field name="view_mode">list,form</field>
             <field name="domain">[('batch_id', '=', active_id)]</field>
-            <field name="context">{'default_batch_id': active_id}</field>
+            <field name="context">{}</field>
         </record>
     </data>
 </odoo>

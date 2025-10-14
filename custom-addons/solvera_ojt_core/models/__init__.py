@@ -8,3 +8,4 @@ from . import ojt_assignment_submit
 from . import ojt_attendance
 from . import event_event
 from . import hr_applicant
+from . import survey_survey

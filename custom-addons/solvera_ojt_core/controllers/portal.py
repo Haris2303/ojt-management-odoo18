@@ -163,11 +163,30 @@ class OjtCustomerPortal(CustomerPortal):
         
         agenda_items = participant_to_show.batch_id.event_link_ids.sorted(key=lambda r: r.event_id.date_begin)
 
+        surveys_to_check = participant_to_show.batch_id.sudo().survey_id
+
+        survey_data = []
+        if surveys_to_check:
+            # Ambil semua submission survei yang pernah dilakukan oleh user ini
+            user_inputs = request.env['survey.user_input'].sudo().search([
+                ('partner_id', '=', user_partner.id),
+                ('survey_id', 'in', surveys_to_check.ids),
+                ('state', '=', 'done') # Hanya yang sudah selesai
+            ])
+            completed_survey_ids = user_inputs.mapped('survey_id').ids
+
+            for survey in surveys_to_check:
+                survey_data.append({
+                    'survey': survey,
+                    'is_done': survey.id in completed_survey_ids,
+                })
+
         values = {
             'participant': participant_to_show,
             'progress_data': progress_data,
             'assignments': all_assignments,
             'agenda_items': agenda_items,
+            'survey_data': survey_data,
             'page_name': 'dashboard',
         }
         return request.render("solvera_ojt_core.portal_participant_dashboard", values)
