@@ -103,5 +103,26 @@
             <field name="domain_force">[('participant_id.partner_id', '=', user.partner_id.id)]</field>
         </record>
 
+        <record id="ojt_participant_portal_user_rule" model="ir.rule">
+            <field name="name">OJT Participant: Portal user can see own record</field>
+            <field name="model_id" ref="model_ojt_participant"/>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/> <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+        </record>
+
+        <record id="hr_applicant_portal_user_rule" model="ir.rule">
+            <field name="name">Applicant: Portal user can see own applications</field>
+            <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+        </record>
+
     </data>
 </odoo>

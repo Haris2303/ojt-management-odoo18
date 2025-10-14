@@ -9,12 +9,26 @@ from odoo.addons.portal.controllers.portal import CustomerPortal
 class OjtCustomerPortal(CustomerPortal):
 
     def _prepare_home_portal_values(self, counters):
-        values = super()._prepare_home_portal_values(counters)
+        # Jalankan method asli untuk mendapatkan nilai-nilai standar (seperti Sales Order, dll.)
+        values = super(OjtCustomerPortal, self)._prepare_home_portal_values(counters)
+        
+        # --- LOGIKA BARU DIMULAI DI SINI ---
+        
+        # Hitung jumlah OJT Participant (sudah ada)
         participant_count = request.env['ojt.participant'].search_count([
             ('partner_id', '=', request.env.user.partner_id.id),
             ('state', '=', 'active')
         ])
-        values['ojt_count'] = participant_count
+        
+        # Hitung jumlah Lamaran Pekerjaan milik user yang login
+        # Ini akan otomatis difilter oleh Record Rule yang sudah kita buat
+        application_count = request.env['hr.applicant'].search_count([])
+        
+        # Tambahkan hasil hitungan ke dictionary 'values'
+        values.update({
+            'ojt_count': participant_count,
+            'application_count': application_count,
+        })
         return values
 
     # ==========================================================
@@ -340,3 +354,15 @@ class OjtCustomerPortal(CustomerPortal):
             'token': token,
         }
         return request.render("solvera_ojt_core.ojt_certificate_verification_page", values)
+
+    @http.route(['/my/applications'], type='http', auth="user", website=True)
+    def portal_my_applications(self, **kw):
+        # Cari semua lamaran yang terhubung dengan partner pengguna yang login
+        # Record Rule yang sudah kita buat akan otomatis memfilter ini
+        applications = request.env['hr.applicant'].search([])
+        
+        values = {
+            'applications': applications,
+            'page_name': 'applications',
+        }
+        return request.render("solvera_ojt_core.portal_my_applications_list", values)

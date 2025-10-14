@@ -89,11 +89,4 @@
         <field name="view_mode">kanban,list,form</field>
     </record>
 
-    <menuitem
-        id="ojt_assignment_menu"
-        name="Assignments"
-        parent="menu_ojt_root" 
-        action="ojt_assignment_action"
-        sequence="2"/>
-
 </odoo>

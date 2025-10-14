@@ -71,12 +71,4 @@
             </p>
         </field>
     </record>
-
-    <menuitem
-        id="ojt_certificate_menu"
-        name="Certificates"
-        parent="menu_ojt_root"
-        action="ojt_certificate_action"
-        sequence="4"/>
-
 </odoo>
