@@ -17,5 +17,12 @@
                 </form>
             </field>
         </record>
-        </data>
+
+        <record id="action_hr_applicant_enroll_wizard_window" model="ir.actions.act_window">
+            <field name="name">Enroll to OJT Batch</field>
+            <field name="res_model">hr.applicant.enroll.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+    </data>
 </odoo>

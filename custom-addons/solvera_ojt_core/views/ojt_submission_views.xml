@@ -109,11 +109,4 @@
         <field name="context">{'group_by':'state'}</field>
     </record>
 
-    <menuitem
-        id="ojt_assignment_submit_menu"
-        name="Submissions"
-        parent="menu_ojt_root" 
-        action="ojt_assignment_submit_action"
-        sequence="3"/>
-
 </odoo>

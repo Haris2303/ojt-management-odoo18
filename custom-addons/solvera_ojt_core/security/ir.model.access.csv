@@ -40,3 +40,7 @@ access_ir_attachment_portal_user,ir.attachment for portal user,base.model_ir_att
 access_ojt_certificate_portal_user,ojt.certificate for portal user,model_ojt_certificate,base.group_portal,1,0,0,0
 access_ojt_batch_public,ojt.batch for public user,model_ojt_batch,base.group_public,1,0,0,0
 access_ojt_generate_certificates_wizard_manager,ojt.generate.certificates.wizard for manager,model_ojt_generate_certificates_wizard,solvera_ojt_core.ojt_group_manager,1,1,1,1
+
+access_hr_applicant_enroll_wizard_manager,hr.applicant.enroll.wizard for manager,model_hr_applicant_enroll_wizard,solvera_ojt_core.ojt_group_manager,1,1,1,1
+access_hr_applicant_portal_user,hr.applicant for portal user,hr_recruitment.model_hr_applicant,base.group_portal,1,0,0,0
+access_hr_recruitment_stage_portal_user,hr.recruitment.stage for portal user,hr_recruitment.model_hr_recruitment_stage,base.group_portal,1,0,0,0

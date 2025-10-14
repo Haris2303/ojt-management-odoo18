@@ -5,12 +5,5 @@
         <field name="res_model">ojt.attendance</field>
         <field name="view_mode">pivot,graph,list,form</field>
     </record>
-
-    <menuitem
-        id="ojt_reporting_dashboard_menu"
-        name="Dashboard"
-        parent="menu_ojt_reporting_submenu"
-        action="ojt_reporting_dashboard_action"
-        sequence="1"/>
     
 </odoo>

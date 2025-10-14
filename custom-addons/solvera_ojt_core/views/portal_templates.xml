@@ -363,4 +363,66 @@
             </div>
         </t>
     </template>
+
+    <template id="portal_my_home_add_applications_link" inherit_id="portal.portal_my_home" name="Portal My Home: Applications">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-if="application_count">
+                <div class="col-12 col-md-6">
+                    <a class="o_portal_doc_card" href="/my/applications" title="My Applications">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-file-text-o fa-3x text-info mr-3" aria-hidden="true"></i>
+                                    <div>
+                                        <h5 class="card-title mb-0">My Applications</h5>
+                                        <p class="card-text text-muted small">
+                                            <span class="badge badge-pill badge-info"><t t-esc="application_count"/></span>
+                                            Lacak status lamaran pekerjaan Anda.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_applications_list" name="My Applications List">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('My Applications', '/my/applications')]"/>
+            
+            <div class="container">
+                <h3 class="mt-4">Lamaran Pekerjaan Anda</h3>
+                
+                <t t-if="not applications">
+                    <div class="alert alert-info">Anda belum pernah mengirimkan lamaran.</div>
+                </t>
+
+                <div t-if="applications" class="list-group mt-4">
+                    <div t-foreach="applications" t-as="app" class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1"><t t-esc="app.job_id.name or 'Tidak ada posisi'"/></h5>
+                            <small class="text-muted">Dilamar pada: <span t-field="app.create_date" t-options='{"format": "dd MMMM yyyy"}'/></small>
+                        </div>
+                        <div>
+                            <t t-if="app.portal_status == 'accepted'">
+                                <span class="badge badge-pill badge-success">Accepted</span>
+                            </t>
+                            <t t-elif="app.portal_status == 'shortlisted'">
+                                <span class="badge badge-pill badge-info">In Process</span>
+                            </t>
+                            <t t-elif="app.portal_status == 'rejected'">
+                                <span class="badge badge-pill badge-danger">Not Retained</span>
+                            </t>
+                            <t t-else="">
+                                <span class="badge badge-pill badge-secondary">Pending</span>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
 </odoo>
