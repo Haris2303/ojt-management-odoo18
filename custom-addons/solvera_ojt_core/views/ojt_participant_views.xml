@@ -57,7 +57,10 @@
                             </group>
                         </group>
                         <notebook>
-                            </notebook>
+                            <page string="eLearning Courses">
+                                <field name="course_ids"/>
+                            </page>
+                        </notebook>
                     </sheet>
                 </form>
             </field>

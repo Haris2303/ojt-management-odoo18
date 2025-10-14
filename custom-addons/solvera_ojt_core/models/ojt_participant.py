@@ -16,6 +16,13 @@ class OjtParticipant(models.Model):
         'hr.applicant', string='Recruitment Applicant', 
         help="Original applicant record from recruitment.")
     
+    applicant_email = fields.Char(
+        string='Applicant Email',
+        related='applicant_id.email_from',
+        store=True,
+        readonly=True
+    )
+    
     attendance_count = fields.Integer(string="Presents", compute='_compute_attendance_rate', store=True)
     attendance_rate = fields.Float(string="Attendance Rate (%)", compute='_compute_attendance_rate', store=True, group_operator="avg")
     

@@ -28,7 +28,7 @@ class OjtBatch(models.Model):
     # Relational fields (will be defined in other models)
     participant_ids = fields.One2many('ojt.participant', 'batch_id', string='Participants')
     event_link_ids = fields.One2many('ojt.event.link', 'batch_id', string='Agenda/Events')
-    # course_ids = fields.Many2many('slide.channel', 'ojt_batch_channel_rel', 'batch_id', 'channel_id', string='eLearning Courses')
+    course_ids = fields.Many2many('slide.channel', 'ojt_batch_channel_rel', 'batch_id', 'channel_id', string='eLearning Courses')
 
     # survey_id = fields.Many2one('survey.survey', string='Evaluation Survey')
 

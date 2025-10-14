@@ -67,6 +67,7 @@
                                 <field name="participant_ids">
                                     <list>
                                         <field name="partner_id"/>
+                                        <field name="applicant_email" />
                                         <field name="state"/>
                                     </list>
                                 </field>
@@ -78,6 +79,9 @@
                                         <field name="is_mandatory" />
                                     </list>
                                 </field>
+                            </page>
+                            <page string="eLearning Courses">
+                                <field name="course_ids" />
                             </page>
                             <page string="Description">
                                 <field name="description"/>
