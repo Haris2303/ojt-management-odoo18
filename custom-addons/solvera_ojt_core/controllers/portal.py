@@ -117,7 +117,7 @@ class OjtCustomerPortal(CustomerPortal):
         # Cari SEMUA record participant yang aktif (hapus limit=1)
         participants = request.env['ojt.participant'].search([
             ('partner_id', '=', user_partner.id),
-            ('state', '=', 'active')
+            ('state', 'in', ['active', 'completed'])
         ])
 
         if not participants:
