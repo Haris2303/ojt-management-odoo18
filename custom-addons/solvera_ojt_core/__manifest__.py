@@ -26,7 +26,7 @@
         'security/ir.model.access.csv',
         'data/ir_sequence.xml',
         # 'data/cron.xml',
-        'data/mail_templates.xml',
+        'data/mail_template.xml',
         'views/ojt_event_link_views.xml',
         'views/event_event_views.xml',
         # 'views/survey_survey_views.xml',

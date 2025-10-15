@@ -30,13 +30,6 @@ class OjtBatch(models.Model):
     event_link_ids = fields.One2many('ojt.event.link', 'batch_id', string='Agenda/Events')
     course_ids = fields.Many2many('slide.channel', 'ojt_batch_channel_rel', 'batch_id', 'channel_id', string='eLearning Courses')
 
-    # survey_id = fields.Many2one('survey.survey', string='Evaluation Survey')
-
-    """
-    Catatan: Beberapa field relasional seperti event_link_ids, course_ids, dan survey_id saya beri komentar # untuk sementara. 
-    Kita akan mengaktifkannya setelah model-model tersebut dibuat agar tidak terjadi error.
-    """
-
     participant_count = fields.Integer(string="Participant Count", compute='_compute_counts')
     event_link_count = fields.Integer(string="Event Count", compute='_compute_counts')
     

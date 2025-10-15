@@ -67,7 +67,7 @@
                                 <field name="participant_ids">
                                     <list>
                                         <field name="partner_id"/>
-                                        <field name="applicant_email" />
+                                        <field name="applicant_email" string="Email" />
                                         <field name="state"/>
                                     </list>
                                 </field>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 class HrApplicant(models.Model):
     _inherit = 'hr.applicant'
@@ -16,16 +16,15 @@ class HrApplicant(models.Model):
     ], string="Portal Status", compute='_compute_portal_status')
 
     def action_open_enroll_wizard(self):
-        self.ensure_one() # Memastikan aksi hanya dijalankan pada satu record
+        self.ensure_one()
         
-        # --- PENGECEKAN DI SINI ---
-        # Jika stage dari pelamar ini BUKAN 'hired_stage', tampilkan pesan error
-        if not self.stage_id.hired_stage:
-            raise UserError("You can only enroll an applicant from a 'Hired' stage.")
+        # Pengecekan keamanan di sisi server
+        # if not self.stage_id.hired_stage:
+        #     raise UserError("You can only enroll an applicant from a 'Hired' stage.")
 
-        # Jika lolos pengecekan, lanjutkan membuka wizard seperti biasa
+        # Membuka wizard
         action = self.env['ir.actions.act_window']._for_xml_id('solvera_ojt_core.action_hr_applicant_enroll_wizard_window')
-        action['context'] = {'active_ids': self.ids}
+        action['context'] = {'default_applicant_ids': self.ids}
         return action
 
     def write(self, vals):
