@@ -28,7 +28,6 @@ class OjtBatch(models.Model):
     # Relational fields (will be defined in other models)
     participant_ids = fields.One2many('ojt.participant', 'batch_id', string='Participants')
     event_link_ids = fields.One2many('ojt.event.link', 'batch_id', string='Agenda/Events')
-    course_ids = fields.Many2many('slide.channel', 'ojt_batch_channel_rel', 'batch_id', 'channel_id', string='eLearning Courses')
 
     participant_count = fields.Integer(string="Participant Count", compute='_compute_counts')
     event_link_count = fields.Integer(string="Event Count", compute='_compute_counts')
@@ -112,8 +111,9 @@ class OjtBatch(models.Model):
             rec.state = 'ongoing'
 
     def action_done(self):
-        for rec in self:
-            rec.state = 'done'
+        for batch in self:
+            batch.participant_ids.write({'state': 'completed'})
+        return self.write({'state': 'done'})
 
     def action_open_generate_certificates_wizard(self):
         return {
@@ -139,3 +139,20 @@ class OjtBatch(models.Model):
         action['domain'] = [('batch_id', '=', self.id)]
         action['context'] = {'default_batch_id': self.id}
         return action
+
+    def write(self, vals):
+        # Cek apakah 'state' sedang diubah di dalam operasi write ini
+        if 'state' in vals:
+            new_state = vals['state']
+            # Loop melalui setiap batch yang akan diubah (untuk menangani aksi massal)
+            for batch in self:
+                # Kondisi: Jika state LAMA adalah 'done' DAN state BARU adalah 'draft' atau 'recruit'
+                if batch.state == 'done' and new_state in ['draft', 'recruit']:
+                    # Cari semua peserta di batch ini yang statusnya 'completed'
+                    participants_to_revert = batch.participant_ids.filtered(lambda p: p.state == 'completed')
+                    if participants_to_revert:
+                        # Ubah status mereka kembali menjadi 'active'
+                        participants_to_revert.write({'state': 'active'})
+        
+        # Jalankan proses write asli untuk menyimpan perubahan pada batch
+        return super(OjtBatch, self).write(vals)

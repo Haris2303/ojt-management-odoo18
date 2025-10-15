@@ -47,6 +47,6 @@ class HrApplicantEnroll(models.TransientModel):
 
         # Pindahkan stage semua applicant yang diproses
         if ojt_stage:
-            self.applicant_ids.write({'stage_id': ojt_stage.id})
+            self.applicant_ids.with_context(enroll_from_wizard=True).write({'stage_id': ojt_stage.id})
         
         return {'type': 'ir.actions.act_window_close'}

@@ -36,9 +36,6 @@
                             <button name="action_open_certificates" type="object" class="oe_stat_button" icon="fa-certificate">
                                 <span class="o_stat_text">Certificates</span>
                             </button>
-                            <button name="action_open_courses" type="object" class="oe_stat_button" icon="fa-book" invisible="course_count == 0">
-                                <field name="course_count" widget="statinfo" string="Courses"/>
-                            </button>
                             <button name="action_open_survey_results" type="object" class="oe_stat_button" icon="fa-question-circle" invisible="survey_count == 0">
                                 <field name="survey_count" widget="statinfo" string="Surveys"/>
                             </button>
@@ -51,16 +48,11 @@
                                 <field name="applicant_id"/>
                             </group>
                             <group>
-                                <field name="attendance_rate" readonly="1" widget="percentage"/>
+                                <field name="attendance_rate" readonly="1"/>
                                 <field name="score_final" readonly="1"/>
                                 <field name="mentor_score"/>
                             </group>
                         </group>
-                        <notebook>
-                            <page string="eLearning Courses">
-                                <field name="course_ids"/>
-                            </page>
-                        </notebook>
                     </sheet>
                 </form>
             </field>

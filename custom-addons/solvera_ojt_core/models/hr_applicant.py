@@ -19,8 +19,8 @@ class HrApplicant(models.Model):
         self.ensure_one()
         
         # Pengecekan keamanan di sisi server
-        # if not self.stage_id.hired_stage:
-        #     raise UserError("You can only enroll an applicant from a 'Hired' stage.")
+        if self.stage_id.name.lower() != 'new':
+            raise UserError("You can only enroll an applicant from a 'New' stage.")
 
         # Membuka wizard
         action = self.env['ir.actions.act_window']._for_xml_id('solvera_ojt_core.action_hr_applicant_enroll_wizard_window')
@@ -28,21 +28,27 @@ class HrApplicant(models.Model):
         return action
 
     def write(self, vals):
-        # Ambil stage baru jika ada perubahan
-        new_stage = self.env['hr.recruitment.stage'].browse(vals.get('stage_id')) if vals.get('stage_id') else None
-        
-        # Jalankan proses write asli
+        # Cek apakah 'stage_id' sedang diubah
+        if 'stage_id' in vals:
+            # Periksa "kunci rahasia". Jika kunci ini ada, lewati validasi.
+            if not self.env.context.get('enroll_from_wizard'):
+                new_stage = self.env['hr.recruitment.stage'].browse(vals.get('stage_id'))
+                # Ini adalah aturan validasi Anda yang sudah ada
+                if new_stage and 'ojt' in new_stage.name.lower():
+                    raise ValidationError("Anda tidak dapat memindahkan pelamar ke stage 'OJT' secara manual. Gunakan tombol 'Enroll to OJT' untuk melanjutkan.")
+
+        # Jalankan proses write asli (termasuk logika otomatisasi Anda)
         res = super(HrApplicant, self).write(vals)
 
         # Lakukan pengecekan SETELAH data tersimpan
+        new_stage_after_write = self.env['hr.recruitment.stage'].browse(vals.get('stage_id')) if vals.get('stage_id') else None
         for applicant in self:
-            # Jika stage baru adalah "Hired" dan batch sudah dipilih
-            if new_stage and new_stage.hired_stage and applicant.batch_id:
-                # Panggil method untuk membuat participant (logikanya sama seperti di wizard)
+            if new_stage_after_write and new_stage_after_write.hired_stage and applicant.batch_id:
                 self.env['hr.applicant.enroll.wizard'].create({
                     'applicant_ids': [(4, applicant.id)],
                     'batch_id': applicant.batch_id.id,
                 }).action_enroll()
+                
         return res
         
     @api.depends('stage_id', 'stage_id.hired_stage')

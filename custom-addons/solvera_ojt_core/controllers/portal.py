@@ -17,7 +17,7 @@ class OjtCustomerPortal(CustomerPortal):
         # Hitung jumlah OJT Participant (sudah ada)
         participant_count = request.env['ojt.participant'].search_count([
             ('partner_id', '=', request.env.user.partner_id.id),
-            ('state', '=', 'active')
+            ('state', 'in', ['active', 'completed'])
         ])
         
         # Hitung jumlah Lamaran Pekerjaan milik user yang login
@@ -145,7 +145,7 @@ class OjtCustomerPortal(CustomerPortal):
         # -- Sisa dari kode dashboard tetap sama, menggunakan 'participant_to_show' --
         
         assignment_submitted = request.env['ojt.assignment.submit'].search_count([
-            ('participant_id', '=', participant_to_show.batch_id.id)
+            ('participant_id', '=', participant_to_show.id)
         ])
         assignment_total = request.env['ojt.assignment'].search_count([
             ('batch_id', '=', participant_to_show.batch_id.id),

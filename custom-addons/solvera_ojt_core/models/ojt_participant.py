@@ -44,13 +44,8 @@ class OjtParticipant(models.Model):
 
     score_avg = fields.Float(string='Average Score', compute='_compute_scores', store=True, digits=(16, 2))
     score_final = fields.Float(string='Final Score', compute='_compute_scores', store=True, digits=(16, 2))
-
-    course_ids = fields.Many2many(
-        'slide.channel', 'ojt_participant_channel_rel', 'participant_id', 
-        'channel_id', string='eLearning Enrollments')
     
     # --- FIELD-FIELD COMPUTE DIPERBAIKI ---
-    course_count = fields.Integer(string="Course Count", compute='_compute_course_count', store=True)
     survey_count = fields.Integer(string="Survey Count", compute='_compute_survey_count', store=True)
 
     @api.depends('course_ids')
@@ -91,11 +86,49 @@ class OjtParticipant(models.Model):
     # Method _compute_scores Anda sudah benar, tidak perlu diubah
     @api.depends('submission_ids.score', 'submission_ids.state', 'submission_ids.assignment_id.weight', 'submission_ids.assignment_id.max_score', 'mentor_score')
     def _compute_scores(self):
-        # ... isi method biarkan seperti yang sudah Anda buat ...
+        # Tentukan bobot
+        weight_assignment = 0.7
+        weight_mentor = 0.2
+        weight_quiz = 0.1
+
         for participant in self:
-            # ... logika perhitungan berbobot ...
-            # ...
-            participant.score_final = (participant.score_avg * 0.8) + (participant.mentor_score * 0.2)
+            # 1. Hitung rata-rata berbobot dari tugas (logika ini sudah benar)
+            scored_submissions = participant.submission_ids.filtered(lambda s: s.state == 'scored')
+            total_weighted_score = 0.0
+            total_weight = 0.0
+            if scored_submissions:
+                for sub in scored_submissions:
+                    assignment = sub.assignment_id
+                    if assignment.max_score > 0 and assignment.weight > 0:
+                        normalized_score = (sub.score / assignment.max_score) * 100.0
+                        total_weighted_score += normalized_score * assignment.weight
+                        total_weight += assignment.weight
+                
+                if total_weight > 0:
+                    participant.score_avg = total_weighted_score / total_weight
+                else:
+                    participant.score_avg = 0.0
+            else:
+                participant.score_avg = 0.0
+            
+            # 2. Ambil nilai kuis dari survei
+            quiz_score = 0.0
+            if participant.batch_id.survey_id and participant.partner_id:
+                # Cari jawaban survei yang sudah selesai untuk peserta ini
+                survey_input = self.env['survey.user_input'].search([
+                    ('survey_id', '=', participant.batch_id.survey_id.id),
+                    ('partner_id', '=', participant.partner_id.id),
+                    ('state', '=', 'done')
+                ], limit=1, order='create_date desc')
+                if survey_input:
+                    quiz_score = survey_input.scoring_percentage
+
+            # 3. Hitung nilai akhir gabungan
+            final_score = (participant.score_avg * weight_assignment) + \
+                          (participant.mentor_score * weight_mentor) + \
+                          (quiz_score * weight_quiz)
+            
+            participant.score_final = final_score
 
     # --- METHOD ACTION UNTUK SMART BUTTON DIPERBAIKI ---
     def action_open_assignments(self):
@@ -126,16 +159,6 @@ class OjtParticipant(models.Model):
             'res_model': 'ojt.certificate',
             'view_mode': 'list,form',
             'domain': [('participant_id', '=', self.id)],
-        }
-
-    def action_open_courses(self):
-        self.ensure_one()
-        return {
-            'name': 'eLearning Courses',
-            'type': 'ir.actions.act_window',
-            'res_model': 'slide.channel',
-            'view_mode': 'kanban,form',
-            'domain': [('id', 'in', self.course_ids.ids)],
         }
 
     def action_open_survey_results(self):
