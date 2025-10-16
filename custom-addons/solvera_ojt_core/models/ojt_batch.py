@@ -135,7 +135,7 @@ class OjtBatch(models.Model):
 
     def action_view_agenda(self):
         self.ensure_one()
-        action = self.env['ir.actions.act_window']._for_xml_id('solvera_ojt_core.action_ojt_event_link')
-        action['domain'] = [('batch_id', '=', self.id)]
-        action['context'] = {'default_batch_id': self.id}
-        return action
+        return self.env['ir.actions.act_window']._for_xml_id('solvera_ojt_core.action_ojt_event_link_from_batch')
+        # action['domain'] = [('batch_id', '=', self.id)]
+        # action['context'] = {'default_batch_id': self.id}
+        # return action

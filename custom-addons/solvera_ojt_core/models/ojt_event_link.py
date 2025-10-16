@@ -29,9 +29,24 @@ class OjtEventLink(models.Model):
     online_meeting_url = fields.Char(
         string='Online Meeting URL',
         help="Override/shortcut for the meeting link. If empty, the link from the event will be used.")
-    notes = fields.Text(string='Notes')
 
+    title = fields.Char(string='Title', related='event_id.name', readonly=False)
+    date_start = fields.Datetime(string='Date Start', related='event_id.date_begin', readonly=False)
+    date_end = fields.Datetime(string='Date End', related='event_id.date_end', readonly=False)
+    instructor_id = fields.Many2one('res.partner', string='Instructor / Speaker')
+    notes = fields.Text(string='Notes')
     qr_code_image = fields.Binary("QR Code", compute='_compute_qr_code')
+
+    participant_count = fields.Integer(compute='_compute_related_counts')
+    attendance_count = fields.Integer(compute='_compute_related_counts')
+    assignment_count = fields.Integer(compute='_compute_related_counts')
+
+    @api.depends('batch_id.participant_ids', 'event_id')
+    def _compute_related_counts(self):
+        for rec in self:
+            rec.participant_count = rec.batch_id.participant_count
+            rec.attendance_count = self.env['ojt.attendance'].search_count([('event_link_id', '=', rec.id)])
+            rec.assignment_count = self.env['ojt.assignment'].search_count([('event_link_id', '=', rec.id)])
 
     def _compute_qr_code(self):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
@@ -62,3 +77,17 @@ class OjtEventLink(models.Model):
                     template.with_context(**email_context).send_mail(new_event_link.id, force_send=True)
 
         return new_event_link
+
+    def action_view_participants(self):
+        self.ensure_one()
+        return {
+            'name': 'Participants', 'type': 'ir.actions.act_window', 'res_model': 'ojt.participant',
+            'view_mode': 'list,form', 'domain': [('id', 'in', self.batch_id.participant_ids.ids)],
+        }
+
+    def action_view_attendance_log(self):
+        self.ensure_one()
+        return {
+            'name': 'Attendance Log', 'type': 'ir.actions.act_window', 'res_model': 'ojt.attendance',
+            'view_mode': 'list,form', 'domain': [('event_link_id', '=', self.id)],
+        }
