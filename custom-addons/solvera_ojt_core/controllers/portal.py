@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import uuid
 import base64
+import werkzeug
 from odoo import http, fields
 from odoo.http import request
 from odoo.addons.portal.controllers.portal import CustomerPortal
@@ -22,34 +23,6 @@ class OjtCustomerPortal(CustomerPortal):
             'application_count': application_count,
         })
         return values
-
-    @http.route(['/my/ojt'], type='http', auth="user", website=True)
-    def portal_my_ojt_agenda(self, participant_id=None, **kw):
-        user_partner = request.env.user.partner_id
-        participants = request.env['ojt.participant'].search([
-            ('partner_id', '=', user_partner.id),
-            ('state', '=', 'active')
-        ])
-
-        if not participants:
-            return request.redirect('/my')
-
-        if participant_id:
-            participant_to_show = participants.filtered(lambda p: p.id == int(participant_id))
-        elif len(participants) == 1:
-            participant_to_show = participants
-        else:
-            return request.redirect('/my/dashboard')
-            
-        if not participant_to_show:
-            return request.redirect('/my')
-
-        values = {
-            'participant': participant_to_show,
-            'agenda_items': participant_to_show.batch_id.event_link_ids,
-            'page_name': 'ojt_agenda',
-        }
-        return request.render("solvera_ojt_core.portal_template_ojt_agenda", values)
     
     @http.route(['/ojt/attend/<int:event_link_id>'], type='http', auth="user", website=True)
     def ojt_qr_checkin(self, event_link_id, **kw):

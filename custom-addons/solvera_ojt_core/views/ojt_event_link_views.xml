@@ -28,7 +28,7 @@
                         </button>
                     </div>
                     <div class="oe_title">
-                        <h1><field name="title" placeholder="Session Title"/></h1>
+                        <h1><field name="title" placeholder="Session Title" readonly="True"/></h1>
                     </div>
                     <group>
                         <group>
@@ -79,7 +79,7 @@
     <record id="action_ojt_event_link_from_batch" model="ir.actions.act_window">
         <field name="name">Agenda/Events</field>
         <field name="res_model">ojt.event.link</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="domain">[('batch_id', '=', active_id)]</field>
         <field name="context">{'default_batch_id': active_id}</field>
     </record>
