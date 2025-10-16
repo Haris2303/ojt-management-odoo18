@@ -40,6 +40,8 @@ class GenerateCertificatesWizard(models.TransientModel):
 
     def action_generate_certificates(self):
         self.ensure_one()
+
+        template = self.env.ref('solvera_ojt_core.mail_template_certificate_issued', raise_if_not_found=False)
         
         for participant in self.eligible_participant_ids:
             # Cek apakah sertifikat sudah ada
@@ -56,13 +58,14 @@ class GenerateCertificatesWizard(models.TransientModel):
                 existing_certificate.unlink()
 
             # Buat record sertifikat baru
-            self.env['ojt.certificate'].create({
+            new_certificate = self.env['ojt.certificate'].create({
                 'name': f"Certificate for {participant.name}",
                 'participant_id': participant.id,
                 'batch_id': self.batch_id.id,
                 'state': 'issued',
-                # Nilai skor dan absensi akan disalin secara otomatis oleh method create
-                # yang sudah kita buat di ojt.certificate
             })
+
+            if template and new_certificate:
+                template.send_mail(new_certificate.id, force_send=True)
         
         return {'type': 'ir.actions.act_window_close'}

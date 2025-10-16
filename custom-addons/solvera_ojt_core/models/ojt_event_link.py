@@ -5,8 +5,7 @@ try:
     import qrcode
 except ImportError:
     qrcode = None
-
-from odoo import models, fields
+from odoo import models, fields, api
 
 class OjtEventLink(models.Model):
     _name = 'ojt.event.link'
@@ -35,3 +34,27 @@ class OjtEventLink(models.Model):
                 rec.qr_code_image = base64.b64encode(temp.getvalue())
             else:
                 rec.qr_code_image = False
+
+    @api.model
+    def create(self, vals):
+        # 1. Jalankan proses create asli untuk membuat record agenda baru
+        new_event_link = super(OjtEventLink, self).create(vals)
+
+        # 2. Ambil template email yang sudah kita buat
+        template = self.env.ref('solvera_ojt_core.mail_template_new_ojt_agenda', raise_if_not_found=False)
+        
+        # 3. Pastikan template ada dan ada peserta di dalam batch
+        if template and new_event_link.batch_id.participant_ids:
+            # 4. Loop melalui setiap peserta di dalam batch
+            for participant in new_event_link.batch_id.participant_ids:
+                if participant.partner_id.email:
+                    # 5. Siapkan context dengan data dinamis untuk setiap email
+                    email_context = {
+                        'participant_name_placeholder': participant.partner_id.name,
+                        'participant_email_placeholder': participant.partner_id.email,
+                    }
+                    
+                    # 6. Kirim email
+                    template.with_context(**email_context).send_mail(new_event_link.id, force_send=True)
+
+        return new_event_link
