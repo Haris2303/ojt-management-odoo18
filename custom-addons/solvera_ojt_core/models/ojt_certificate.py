@@ -1,62 +1,70 @@
 # -*- coding: utf-8 -*-
 import base64
 import io
+import uuid
+
 try:
     import qrcode
 except ImportError:
     qrcode = None
-import uuid
-from odoo import models, fields, api
 
-# Bagian ini harus di bedah
+from odoo import models, fields, api
 
 class OjtCertificate(models.Model):
     _name = 'ojt.certificate'
     _description = 'OJT Digital Certificate'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string='Certificate Title', required=True, help="e.g., OJT Business Analyst – Oct 2025")
+    name = fields.Char(
+        string='Certificate Title', required=True, tracking=True,
+        help="e.g., OJT Business Analyst – Oct 2025")
     
-    batch_id = fields.Many2one('ojt.batch', string='OJT Batch', required=True, index=True)
-    participant_id = fields.Many2one('ojt.participant', string='Participant', required=True, index=True)
-    partner_id = fields.Many2one('res.partner', string='Partner', related='participant_id.partner_id', store=True)
+    batch_id = fields.Many2one(
+        'ojt.batch', string='OJT Batch', required=True, index=True, tracking=True)
+    participant_id = fields.Many2one(
+        'ojt.participant', string='Participant', required=True, index=True, tracking=True)
+    partner_id = fields.Many2one(
+        'res.partner', string='Partner', 
+        related='participant_id.partner_id', store=True)
     
-    # Ada kode unik dari serial untuk sequence !!!!!!!
-    serial = fields.Char(string='Serial Number', required=True, unique=True, index=True, copy=False, default='/')
-    qr_token = fields.Char(string='Verification Token', required=True, unique=True, index=True, copy=False, default=lambda self: str(uuid.uuid4()))
+    serial = fields.Char(
+        string='Serial Number', required=True, index=True, copy=False, default='/')
+    qr_token = fields.Char(
+        string='Verification Token', required=True, index=True, copy=False,
+        default=lambda self: str(uuid.uuid4()))
     
-    issued_on = fields.Date(string='Issued On', default=fields.Date.today)
+    issued_on = fields.Date(string='Issued On', readonly=True, copy=False)
     
-    # Store the values at the time of issuance
-    attendance_rate = fields.Float(string='Attendance Rate (%)', store=True)
-    final_score = fields.Float(string='Final Score', store=True)
+    attendance_rate = fields.Float(string='Attendance Rate (%)', readonly=True)
+    final_score = fields.Float(string='Final Score', readonly=True)
     
     grade = fields.Selection([
-        ('A', 'A'),
-        ('B', 'B'),
-        ('C', 'C')
+        ('A', 'A'), ('B', 'B'), ('C', 'C')
     ], string='Grade', compute='_compute_grade', store=True)
     
     state = fields.Selection([
         ('draft', 'Draft'),
         ('issued', 'Issued'),
         ('revoked', 'Revoked')
-    ], string='Status', default='draft', track_visibility='onchange')
+    ], string='Status', default='draft', tracking=True)
     
     notes = fields.Text(string='Internal Notes')
-
     qr_code_image = fields.Binary("Verification QR Code", compute='_compute_qr_code')
+
+    _sql_constraints = [
+        ('serial_uniq', 'unique(serial)', 'The Serial Number must be unique!'),
+        ('qr_token_uniq', 'unique(qr_token)', 'The QR Token must be unique!'),
+    ]
 
     @api.model
     def create(self, vals):
-        # Ambil data dari participant dan sisipkan ke vals sebelum record dibuat
         if vals.get('participant_id'):
             participant = self.env['ojt.participant'].browse(vals['participant_id'])
-            vals['final_score'] = participant.score_final
-            vals['attendance_rate'] = participant.attendance_rate
-        # --- AKHIR LOGIKA BARU ---
+            vals.update({
+                'final_score': participant.score_final,
+                'attendance_rate': participant.attendance_rate,
+            })
 
-        # Lanjutkan dengan logic sequence number yang sudah ada
         if vals.get('serial', '/') == '/':
             vals['serial'] = self.env['ir.sequence'].next_by_code('ojt.certificate') or '/'
         
@@ -73,13 +81,12 @@ class OjtCertificate(models.Model):
                 cert.grade = 'C'
 
     def action_issue(self):
-        """Changes the certificate state to 'Issued'."""
-        self.write({
+        return self.write({
             'state': 'issued',
-            'issued_on': fields.Date.context_today(self)
+            'issued_on': fields.Date.context_today(self),
         })
-        return True
-    
+
+    @api.depends('qr_token')
     def _compute_qr_code(self):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         for rec in self:

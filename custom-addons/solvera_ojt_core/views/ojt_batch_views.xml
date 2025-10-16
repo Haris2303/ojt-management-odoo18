@@ -22,10 +22,14 @@
             <field name="arch" type="xml">
                 <form>
                     <header>
-                        <button name="action_open_generate_certificates_wizard" string="Generate Certificates" type="object" class="oe_highlight" invisible="state != 'done'"/>
-                        <button name="action_recruit" string="Start Recruitment" type="object" class="oe_highlight" invisible="state != 'draft'"/>
-                        <button name="action_ongoing" string="Start Program" type="object" class="oe_highlight" invisible="state != 'recruit'"/>
-                        <button name="action_done" string="Mark as Done" type="object" class="oe_highlight" invisible="state != 'ongoing'"/>
+                        <button name="action_open_generate_certificates_wizard" string="Generate Certificates" 
+                                type="object" class="oe_highlight" invisible="state != 'done'"/>
+                        <button name="action_recruit" string="Start Recruitment" type="object" 
+                                class="oe_highlight" invisible="state != 'draft'"/>
+                        <button name="action_ongoing" string="Start Program" type="object" 
+                                class="oe_highlight" invisible="state != 'recruit'"/>
+                        <button name="action_done" string="Mark as Done" type="object" 
+                                class="oe_highlight" invisible="state != 'ongoing'"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,recruit,ongoing,done"/>
                     </header>
                     <sheet>

@@ -1,68 +1,72 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 class HrApplicant(models.Model):
     _inherit = 'hr.applicant'
 
-    batch_id = fields.Many2one('ojt.batch', string='Target OJT Batch',
-                                domain="[('state', 'in', ['draft', 'recruit'])]")
+    # Field untuk memilih batch tujuan sebelum applicant diterima
+    batch_id = fields.Many2one(
+        'ojt.batch', 
+        string='Target OJT Batch',
+        domain="[('state', 'in', ['draft', 'recruit'])]",
+        tracking=True
+    )
     
+    # Field untuk menampilkan status sederhana di portal
     portal_status = fields.Selection([
         ('pending', 'Pending'),
         ('shortlisted', 'In Process'),
         ('accepted', 'Accepted'),
         ('rejected', 'Not Retained'),
-    ], string="Portal Status", compute='_compute_portal_status')
+    ], string="Portal Status", compute='_compute_portal_status', store=True)
 
-    def action_open_enroll_wizard(self):
-        self.ensure_one()
-        
-        # Pengecekan keamanan di sisi server
-        if self.stage_id.name.lower() != 'new':
-            raise UserError("You can only enroll an applicant from a 'New' stage.")
-
-        # Membuka wizard
-        action = self.env['ir.actions.act_window']._for_xml_id('solvera_ojt_core.action_hr_applicant_enroll_wizard_window')
-        action['context'] = {'default_applicant_ids': self.ids}
-        return action
-
-    def write(self, vals):
-        # Cek apakah 'stage_id' sedang diubah
-        if 'stage_id' in vals:
-            # Periksa "kunci rahasia". Jika kunci ini ada, lewati validasi.
-            if not self.env.context.get('enroll_from_wizard'):
-                new_stage = self.env['hr.recruitment.stage'].browse(vals.get('stage_id'))
-                # Ini adalah aturan validasi Anda yang sudah ada
-                if new_stage and 'ojt' in new_stage.name.lower():
-                    raise ValidationError("Anda tidak dapat memindahkan pelamar ke stage 'OJT' secara manual. Gunakan tombol 'Enroll to OJT' untuk melanjutkan.")
-
-        # Jalankan proses write asli (termasuk logika otomatisasi Anda)
-        res = super(HrApplicant, self).write(vals)
-
-        # Lakukan pengecekan SETELAH data tersimpan
-        new_stage_after_write = self.env['hr.recruitment.stage'].browse(vals.get('stage_id')) if vals.get('stage_id') else None
-        for applicant in self:
-            if new_stage_after_write and new_stage_after_write.hired_stage and applicant.batch_id:
-                self.env['hr.applicant.enroll.wizard'].create({
-                    'applicant_ids': [(4, applicant.id)],
-                    'batch_id': applicant.batch_id.id,
-                }).action_enroll()
-                
-        return res
-        
-    @api.depends('stage_id', 'stage_id.hired_stage')
+    @api.depends('stage_id.name', 'stage_id.hired_stage')
     def _compute_portal_status(self):
-        # Anda bisa menyesuaikan logika ini sesuai dengan nama stage Anda
-        # Ini hanya contoh sederhana
+        """Menerjemahkan stage internal menjadi status yang mudah dipahami di portal."""
         for applicant in self:
             if applicant.stage_id.hired_stage:
                 applicant.portal_status = 'accepted'
-            elif applicant.stage_id.sequence == 1: # Asumsi stage pertama adalah 'Pending'
+            elif applicant.stage_id.sequence <= 1: # Stage paling awal dianggap 'pending'
                 applicant.portal_status = 'pending'
-            # Anda perlu cara untuk menandai stage 'Rejected'. 
-            # Untuk saat ini, kita bisa asumsikan dari namanya.
-            elif 'refuse' in applicant.stage_id.name.lower() or 'rejected' in applicant.stage_id.name.lower():
-                applicant.portal_status = 'rejected'
-            else: # Stage lainnya kita anggap 'In Process'
+            # Anda bisa menambahkan logika untuk 'rejected' jika Anda membuat stage khusus
+            else: # Semua stage di antaranya dianggap 'In Process'
                 applicant.portal_status = 'shortlisted'
+    
+    def action_open_enroll_wizard(self):
+        self.ensure_one()
+        
+        # Validasi di sisi server
+        first_stage = self.env['hr.recruitment.stage'].search([], order='sequence asc', limit=1)
+        if self.stage_id != first_stage:
+            raise UserError(f"Anda hanya bisa mendaftarkan pelamar dari stage '{first_stage.name}'.")
+
+        # Jika lolos, buka wizard
+        action = self.env['ir.actions.act_window']._for_xml_id('solvera_ojt_core.action_hr_applicant_enroll_wizard_window')
+        action['context'] = {'active_ids': self.ids}
+        return action
+
+    def write(self, vals):
+        """
+        Otomatis membuat OJT Participant saat applicant dipindahkan ke stage 'Hired'.
+        """
+        # Panggil method write asli terlebih dahulu
+        res = super(HrApplicant, self).write(vals)
+
+        # Cek apakah stage diubah ke stage 'Hired'
+        if 'stage_id' in vals:
+            new_stage = self.env['hr.recruitment.stage'].browse(vals.get('stage_id'))
+            if new_stage and new_stage.hired_stage:
+                # Loop melalui setiap applicant yang diubah
+                for applicant in self:
+                    # Pastikan batch sudah dipilih
+                    if not applicant.batch_id:
+                        raise ValidationError(f"Pilih 'Target OJT Batch' terlebih dahulu untuk pelamar {applicant.name}.")
+                    
+                    # Panggil wizard untuk membuat participant dan mengirim email
+                    # Ini menggunakan kembali logika yang sudah ada di wizard
+                    self.env['hr.applicant.enroll.wizard'].create({
+                        'applicant_ids': [(4, applicant.id)],
+                        'batch_id': applicant.batch_id.id,
+                    }).action_enroll()
+        return res

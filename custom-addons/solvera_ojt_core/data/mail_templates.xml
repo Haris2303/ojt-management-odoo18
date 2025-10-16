@@ -57,7 +57,8 @@
                         <span t-out="object.event_id.date_begin"/>
                     </li>
                     <li t-if="object.event_id.online_meeting_url">
-                        <strong>Link Meeting:</strong> <a t-att-href="object.event_id.online_meeting_url">Klik di sini untuk bergabung</a>
+                        <strong>Link Meeting:</strong> 
+                        <a t-att-href="object.event_id.online_meeting_url">Klik di sini untuk bergabung</a>
                     </li>
                 </ul>
                 <p>

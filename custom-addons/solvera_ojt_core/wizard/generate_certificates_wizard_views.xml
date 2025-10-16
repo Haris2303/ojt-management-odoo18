@@ -20,9 +20,23 @@
         <field name="arch" type="xml">
             <form>
                 <p>
-                    Akan dibuat <strong><field name="participant_count" class="oe_inline"/></strong> sertifikat untuk peserta yang memenuhi syarat.
+                    Akan dibuat <strong><field name="participant_count" class="oe_inline"/></strong> 
+                    sertifikat untuk peserta yang memenuhi syarat.
                     <br/>
-                    Syarat: Status 'Completed', Kehadiran &gt;= <field name="batch_id" nolabel="1" readonly="1" field_options='{"no_open": True}' widget="related" related_field="certificate_rule_attendance"/>%, dan Nilai Akhir &gt;= <field name="batch_id" nolabel="1" readonly="1" field_options='{"no_open": True}' widget="related" related_field="certificate_rule_score"/>.
+                    Syarat: Status 'Completed', Kehadiran &gt;= 
+                    <field name="batch_id" 
+                        nolabel="1" 
+                        readonly="1" 
+                        field_options='{"no_open": True}' 
+                        widget="related" 
+                        related_field="certificate_rule_attendance"/>
+                        %, dan Nilai Akhir &gt;= 
+                    <field name="batch_id" 
+                        nolabel="1" 
+                        readonly="1" 
+                        field_options='{"no_open": True}' 
+                        widget="related" 
+                        related_field="certificate_rule_score"/>.
                 </p>
                 <group>
                     <field name="eligible_participant_ids"

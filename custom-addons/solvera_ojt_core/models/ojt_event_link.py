@@ -1,24 +1,34 @@
 # -*- coding: utf-8 -*-
 import base64
 import io
+import logging
+
 try:
     import qrcode
 except ImportError:
     qrcode = None
+    logging.getLogger(__name__).warning("The 'qrcode' library is not installed. QR code generation will be disabled.")
+
 from odoo import models, fields, api
 
 class OjtEventLink(models.Model):
     _name = 'ojt.event.link'
     _description = 'OJT Batch to Event Link'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     batch_id = fields.Many2one('ojt.batch', string='OJT Batch', required=True, ondelete='cascade')
     event_id = fields.Many2one('event.event', string='Event/Session', required=True)
     
-    is_mandatory = fields.Boolean(string='Is Mandatory?', default=True, help="Check if attendance for this session is mandatory for the certificate.")
-    weight = fields.Float(string='Session Weight', default=1.0, help="Weight of this session for progress calculation.")
+    is_mandatory = fields.Boolean(
+        string='Is Mandatory?', default=True, tracking=True,
+        help="Check if attendance for this session is mandatory for the certificate.")
+    weight = fields.Float(
+        string='Session Weight', default=1.0, tracking=True,
+        help="Weight of this session for progress calculation.")
     
-    # This field allows overriding the meeting link from the main event, for specific batches.
-    online_meeting_url = fields.Char(string='Online Meeting URL', help="Override/shortcut for the meeting link. If empty, the link from the event will be used.")
+    online_meeting_url = fields.Char(
+        string='Online Meeting URL',
+        help="Override/shortcut for the meeting link. If empty, the link from the event will be used.")
     notes = fields.Text(string='Notes')
 
     qr_code_image = fields.Binary("QR Code", compute='_compute_qr_code')
@@ -37,24 +47,18 @@ class OjtEventLink(models.Model):
 
     @api.model
     def create(self, vals):
-        # 1. Jalankan proses create asli untuk membuat record agenda baru
+        """ On creation, send a notification email to all participants of the batch. """
         new_event_link = super(OjtEventLink, self).create(vals)
 
-        # 2. Ambil template email yang sudah kita buat
         template = self.env.ref('solvera_ojt_core.mail_template_new_ojt_agenda', raise_if_not_found=False)
         
-        # 3. Pastikan template ada dan ada peserta di dalam batch
         if template and new_event_link.batch_id.participant_ids:
-            # 4. Loop melalui setiap peserta di dalam batch
             for participant in new_event_link.batch_id.participant_ids:
                 if participant.partner_id.email:
-                    # 5. Siapkan context dengan data dinamis untuk setiap email
                     email_context = {
                         'participant_name_placeholder': participant.partner_id.name,
                         'participant_email_placeholder': participant.partner_id.email,
                     }
-                    
-                    # 6. Kirim email
                     template.with_context(**email_context).send_mail(new_event_link.id, force_send=True)
 
         return new_event_link
