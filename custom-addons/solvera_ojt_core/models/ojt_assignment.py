@@ -1,15 +1,25 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
+import logging
+from odoo import models, fields
 
-# Ini ada yang harus di beda
+_logger = logging.getLogger(__name__)
 
 class OjtAssignment(models.Model):
     _name = 'ojt.assignment'
     _description = 'OJT Task/Assignment'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string='Title', required=True)
-    batch_id = fields.Many2one('ojt.batch', string='OJT Batch', required=True, ondelete='cascade')
+    name = fields.Char(string='Title', required=True, tracking=True)
+
+    participant_id = fields.Many2one('ojt.participant', string="Participant", require=False)
+    
+    batch_id = fields.Many2one(
+        'ojt.batch', string='OJT Batch', 
+        related='participant_id.batch_id', store=True, readonly=False)
+    company_id = fields.Many2one(
+        'res.company', string='Company',
+        related='participant_id.company_id', store=True, readonly=True)
+
     event_link_id = fields.Many2one('ojt.event.link', string='Related Session', help="If this assignment is specific to a certain session.")
     
     description = fields.Html(string='Description')
@@ -31,22 +41,8 @@ class OjtAssignment(models.Model):
         ('draft', 'Draft'),
         ('open', 'Open'),
         ('closed', 'Closed')
-    ], string='Status', default='draft', track_visibility='onchange')
-    
-    company_id = fields.Many2one('res.company', string='Company', required=True, related='batch_id.company_id', store=True)
+    ], string='Status', default='draft', tracking=True)
 
-    @api.model
-    def create(self, vals):
-        # Cek jika batch_id ada di data yang akan dibuat
-        if vals.get('batch_id'):
-            # Ambil company_id dari batch yang dipilih
-            batch = self.env['ojt.batch'].browse(vals['batch_id'])
-            # Set company_id di 'vals' secara manual
-            vals['company_id'] = batch.company_id.id
-
-        # Lanjutkan proses create dengan vals yang sudah dimodifikasi
-        return super(OjtAssignment, self).create(vals)
-    
     def action_open(self):
         """Sets the assignment state to 'Open'."""
         return self.write({'state': 'open'})
@@ -65,7 +61,7 @@ class OjtAssignment(models.Model):
         """
         assignments_to_close = self.search([
             ('state', '=', 'open'),
-            ('deadline', '!=', False), # Pastikan deadline ada
+            ('deadline', '!=', False),
             ('deadline', '<', fields.Datetime.now())
         ])
         
