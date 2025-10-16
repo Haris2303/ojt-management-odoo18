@@ -10,7 +10,7 @@ class OjtAssignment(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string='Title', required=True, tracking=True)
-    participant_id = fields.Many2one('ojt.participant', string='Participant', required=True, ondelete='cascade', tracking=True)
+    participant_id = fields.Many2one('ojt.participant', string='Participant', required=True, ondelete='cascade')
     
     batch_id = fields.Many2one(
         'ojt.batch', string='OJT Batch', 
