@@ -74,6 +74,9 @@ class HrApplicant(models.Model):
     def write(self, vals):
         # Cek apakah 'stage_id' sedang diubah
         if 'stage_id' in vals:
+            # Jalankan proses write asli (termasuk logika otomatisasi Anda)
+            res = super(HrApplicant, self).write(vals)
+            
             # Periksa "kunci rahasia". Jika kunci ini ada, lewati validasi.
             if not self.env.context.get('enroll_from_wizard'):
                 new_stage = self.env['hr.recruitment.stage'].browse(vals.get('stage_id'))
@@ -81,8 +84,6 @@ class HrApplicant(models.Model):
                 if new_stage and 'ojt' in new_stage.name.lower():
                     raise ValidationError("Anda tidak dapat memindahkan pelamar ke stage 'OJT' secara manual. Gunakan tombol 'Enroll to OJT' untuk melanjutkan.")
 
-        # Jalankan proses write asli (termasuk logika otomatisasi Anda)
-        res = super(HrApplicant, self).write(vals)
 
         # Lakukan pengecekan SETELAH data tersimpan
         new_stage_after_write = self.env['hr.recruitment.stage'].browse(vals.get('stage_id')) if vals.get('stage_id') else None
