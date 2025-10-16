@@ -60,6 +60,7 @@ class GenerateCertificatesWizard(models.TransientModel):
             })
 
             if template and new_certificate:
+                new_certificate.action_issue()
                 template.send_mail(new_certificate.id, force_send=True)
         
         return {'type': 'ir.actions.act_window_close'}

@@ -73,7 +73,7 @@
         <field name="name">OJT: Certificate Issued Notification</field>
         <field name="model_id" ref="solvera_ojt_core.model_ojt_certificate"/>
         <field name="subject">Selamat! Sertifikat OJT Anda Telah Terbit</field>
-        <field name="email_from">"{{ object.participant_id.company_id.name }}"</field>
+        <field name="email_from">"{{ object.participant_id.company_id.email_formatted }}"</field>
         <field name="email_to">{{ object.participant_id.partner_id.email }}</field>
         <field name="body_html" type="html">
             <div style="font-family: sans-serif; font-size: 14px; color: #555;">

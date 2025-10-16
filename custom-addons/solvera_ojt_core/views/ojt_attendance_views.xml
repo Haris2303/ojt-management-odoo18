@@ -6,7 +6,7 @@
         <field name="model">ojt.attendance</field>
         <field name="arch" type="xml">
             <list editable="bottom">
-                <field name="event_link_id" required="1"/>
+                <field name="event_id" required="1"/>
                 <field name="participant_id" required="1" domain="[('batch_id', '=', batch_id)]"/>
                 <field name="check_in"/>
                 <field name="presence"/>

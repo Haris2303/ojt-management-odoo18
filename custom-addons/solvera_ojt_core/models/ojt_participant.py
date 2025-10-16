@@ -112,7 +112,7 @@ class OjtParticipant(models.Model):
                     ('state', '=', 'done')
                 ], limit=1, order='create_date desc')
                 if survey_input:
-                    quiz_score = survey_input.scoring_score # Field yang benar adalah 'scoring_score'
+                    quiz_score = survey_input.scoring_percentage
 
             participant.score_final = (participant.score_avg * weight_assignment) + \
                                       (participant.mentor_score * weight_mentor) + \
