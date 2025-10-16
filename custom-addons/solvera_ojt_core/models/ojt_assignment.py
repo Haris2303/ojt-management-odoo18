@@ -14,7 +14,7 @@ class OjtAssignment(models.Model):
     
     batch_id = fields.Many2one(
         'ojt.batch', string='OJT Batch', 
-        related='participant_id.batch_id', store=True, readonly=True)
+        related='participant_id.batch_id', store=True, readonly=False)
     company_id = fields.Many2one(
         'res.company', string='Company',
         related='participant_id.company_id', store=True, readonly=True)
