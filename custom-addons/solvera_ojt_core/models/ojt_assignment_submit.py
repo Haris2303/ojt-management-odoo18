@@ -5,18 +5,20 @@ from odoo.exceptions import ValidationError
 class OjtAssignmentSubmit(models.Model):
     _name = 'ojt.assignment.submit'
     _description = 'OJT Assignment Submission'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     assignment_id = fields.Many2one('ojt.assignment', string='Assignment', required=True, ondelete='cascade')
     participant_id = fields.Many2one('ojt.participant', string='Participant', required=True, ondelete='cascade')
     
-    submitted_on = fields.Datetime(string='Submitted On', default=fields.Datetime.now)
+    submitted_on = fields.Datetime(string='Submitted On', default=fields.Datetime.now, readonly=True)
     
-    # Using Many2many for attachments allows multiple file uploads
-    attachment_ids = fields.Many2many('ir.attachment', 'ojt_assignment_submit_attachment_rel', 'submit_id', 'attachment_id', string='Attachments')
+    attachment_ids = fields.Many2many(
+        'ir.attachment', 'ojt_assignment_submit_attachment_rel', 
+        'submit_id', 'attachment_id', string='Attachments')
     url_link = fields.Char(string='URL Link', help="For submissions like Git, Figma, video, etc.")
     
-    score = fields.Float(string='Score')
-    reviewer_id = fields.Many2one('res.users', string='Reviewer', default=lambda self: self.env.user)
+    score = fields.Float(string='Score', tracking=True) # Ditambahkan tracking
+    reviewer_id = fields.Many2one('res.users', string='Reviewer', default=lambda self: self.env.user, tracking=True)
     feedback = fields.Html(string='Feedback')
     
     late = fields.Boolean(string='Submitted Late?', compute='_compute_late', store=True)
@@ -25,27 +27,26 @@ class OjtAssignmentSubmit(models.Model):
         ('draft', 'Draft'),
         ('submitted', 'Submitted'),
         ('scored', 'Scored')
-    ], string='Status', default='submitted')
+    ], string='Status', default='submitted', tracking=True) # Ditambahkan tracking
 
     @api.constrains('score', 'assignment_id')
     def _check_score(self):
         for sub in self:
-            if sub.assignment_id and sub.score > sub.assignment_id.max_score:
-                raise ValidationError(f"The score cannot be higher than the maximum score of {sub.assignment_id.max_score}.")
+            if sub.assignment_id and sub.score and sub.assignment_id.max_score and sub.score > sub.assignment_id.max_score:
+                raise ValidationError(f"The score ({sub.score}) cannot be higher than the maximum score of {sub.assignment_id.max_score}.")
 
     @api.depends('submitted_on', 'assignment_id.deadline')
     def _compute_late(self):
         for sub in self:
-            sub.late = sub.submitted_on and sub.assignment_id.deadline and sub.submitted_on > sub.assignment_id.deadline
+            sub.late = bool(sub.submitted_on and sub.assignment_id.deadline and sub.submitted_on > sub.assignment_id.deadline)
 
     def action_mark_as_scored(self):
         """
-        Marks the submission as 'Scored'.
-        Also ensures a score has been given.
+        Marks the submission as 'Scored' and validates that a score is present.
         """
         for sub in self:
-            if not sub.score and sub.score != 0:
-                raise ValidationError("You cannot mark a submission as scored without providing a score first.")
+            if sub.score is None or sub.score < 0:
+                raise ValidationError("You must provide a valid score before marking as 'Scored'.")
             sub.write({'state': 'scored'})
         return True
 

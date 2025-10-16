@@ -6,7 +6,6 @@ class GenerateCertificatesWizard(models.TransientModel):
 
     batch_id = fields.Many2one('ojt.batch', string='OJT Batch', readonly=True, required=True)
     
-    # Menampilkan daftar peserta yang memenuhi syarat
     eligible_participant_ids = fields.Many2many(
         'ojt.participant', 
         string='Eligible Participants', 
@@ -24,10 +23,9 @@ class GenerateCertificatesWizard(models.TransientModel):
     def _compute_eligible_participants(self):
         for wizard in self:
             if wizard.batch_id:
-                # Tentukan kriteria kelayakan di sini
                 domain = [
                     ('batch_id', '=', wizard.batch_id.id),
-                    ('state', '=', 'completed'), # Hanya untuk peserta yang sudah 'Completed'
+                    ('state', '=', 'completed'),
                     ('attendance_rate', '>=', wizard.batch_id.certificate_rule_attendance),
                     ('score_final', '>=', wizard.batch_id.certificate_rule_score),
                 ]
@@ -44,20 +42,16 @@ class GenerateCertificatesWizard(models.TransientModel):
         template = self.env.ref('solvera_ojt_core.mail_template_certificate_issued', raise_if_not_found=False)
         
         for participant in self.eligible_participant_ids:
-            # Cek apakah sertifikat sudah ada
             existing_certificate = self.env['ojt.certificate'].search([
                 ('participant_id', '=', participant.id)
             ])
             
-            # Jika sudah ada dan tidak mau ditimpa, lewati
             if existing_certificate and not self.overwrite_existing:
                 continue
 
-            # Jika sudah ada dan mau ditimpa, hapus yang lama
             if existing_certificate and self.overwrite_existing:
                 existing_certificate.unlink()
 
-            # Buat record sertifikat baru
             new_certificate = self.env['ojt.certificate'].create({
                 'name': f"Certificate for {participant.name}",
                 'participant_id': participant.id,
@@ -66,6 +60,7 @@ class GenerateCertificatesWizard(models.TransientModel):
             })
 
             if template and new_certificate:
+                new_certificate.action_issue()
                 template.send_mail(new_certificate.id, force_send=True)
         
         return {'type': 'ir.actions.act_window_close'}

@@ -1,42 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="portal_my_home_ojt" name="Portal My Home: OJT" inherit_id="portal.portal_my_home" priority="40">
-        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
-            <a class="list-group-item list-group-item-action" href="/my/ojt">
-                <span class="badge badge-pill badge-info" t-esc="ojt_count"/>
-                My OJT Program
-            </a>
-        </xpath>
-    </template>
-
-    <template id="portal_template_ojt_agenda">
-        <t t-call="portal.portal_layout">
-            <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('My OJT Program', '/my/ojt')]"/>
-            <h3>OJT Program: <t t-esc="participant.batch_id.name"/></h3>
-            <p>Periode: <t t-esc="participant.batch_id.start_date"/> s.d. <t t-esc="participant.batch_id.end_date"/></p>
-            <div class="mt-4">
-                <h4>Agenda Program</h4>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Sesi</th>
-                            <th>Tanggal</th>
-                            <th>Link Meeting</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr t-foreach="agenda_items" t-as="agenda">
-                            <td><t t-esc="agenda.event_id.name"/></td>
-                            <td><span t-field="agenda.event_id.date_begin" t-options='{"widget": "datetime"}'/></td>
-                            <td>
-                                <a t-if="agenda.online_meeting_url" t-att-href="agenda.online_meeting_url" target="_blank" class="btn btn-primary btn-sm">Join Meeting</a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </t>
-    </template>
 
     <template id="portal_template_qr_feedback">
         <t t-call="website.layout">
@@ -167,40 +130,47 @@
     <template id="portal_my_home_add_ojt_dashboard_link" inherit_id="portal.portal_my_home" name="Portal My Home: OJT Dashboard">
         <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
             <t t-if="ojt_count">
-                <div class="col-12 col-md-6">
-                    <a class="o_portal_doc_card" href="/my/dashboard" title="OJT Dashboard">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <i class="fa fa-tachometer fa-3x text-primary mr-3" aria-hidden="true"></i>
-                                    <div>
-                                        <h5 class="card-title mb-0">OJT Dashboard</h5>
-                                        <p class="card-text text-muted small">Lihat progres, tugas, dan jadwal Anda.</p>
-                                    </div>
-                                </div>
+                <div class="o_portal_category row g-2 mt-3">
+                    <div class="o_portal_index_card col-md-6 order-2">
+                        <a class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none bg-100" href="/my/dashboard" title="OJT Dashboard">
+                            <i class="fa fa-tachometer fa-3x text-primary me-3" aria-hidden="true"/>
+                            <div>
+                                <h5 class="card-title mb-0">OJT Dashboard</h5>
+                                <p class="card-text text-muted small">Lihat progres, tugas, dan jadwal Anda.</p>
                             </div>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
+                
+                    <div class="o_portal_index_card col-md-6 order-2">
+                        <a class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none bg-100" href="/my/certificates" title="My Certificates">
+                            <i class="fa fa-certificate fa-3x text-success me-3" aria-hidden="true"></i>
+                            <div>
+                                <h5 class="card-title mb-0">Sertifikat Saya</h5>
+                                <p class="card-text text-muted small">Lihat dan unduh sertifikat OJT Anda.</p>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </t>
 
-            <t t-if="ojt_count">
-                <div class="col-12 col-md-6">
-                    <a class="o_portal_doc_card" href="/my/certificates" title="My Certificates">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <i class="fa fa-certificate fa-3x text-success mr-3" aria-hidden="true"></i>
-                                    <div>
-                                        <h5 class="card-title mb-0">Sertifikat Saya</h5>
-                                        <p class="card-text text-muted small">Lihat dan unduh sertifikat OJT Anda.</p>
-                                    </div>
-                                </div>
+            <t t-if="application_count">
+                <div class="o_portal_index_card row g-2 mt-3">
+                    <div class="col-md-6 order-2">
+                        <a class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none bg-100" 
+                            href="/my/applications" title="My Applications">
+                            <i class="fa fa-file-text-o fa-3x text-info me-3" aria-hidden="true"></i>
+                            <div>
+                                <h5 class="card-title mb-0">My Applications</h5>
+                                <p class="card-text text-muted small">
+                                    <span class="badge badge-pill badge-info"><t t-esc="application_count"/></span>
+                                    Lacak status lamaran pekerjaan Anda.
+                                </p>
                             </div>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
                 </div>
             </t>
+
         </xpath>
     </template>
 
@@ -366,7 +336,7 @@
                 <div t-if="participants" class="list-group mt-4">
                     <div t-foreach="participants" t-as="participant" class="list-group-item d-flex justify-content-between align-items-center">
                         
-                        <t t-set="certificate" t-value="participant.certificate_id[:1]"/>
+                        <t t-set="certificate" t-value="participant.certificate_ids[:1]"/>
 
                         <div>
                             <h5 class="mb-1">Program: <t t-esc="participant.batch_id.name"/></h5>
@@ -383,35 +353,10 @@
                             </a>
                         </div>
 
-                        </div>
+                    </div>
                 </div>
             </div>
         </t>
-    </template>
-
-    <template id="portal_my_home_add_applications_link" inherit_id="portal.portal_my_home" name="Portal My Home: Applications">
-        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
-            <t t-if="application_count">
-                <div class="col-12 col-md-6">
-                    <a class="o_portal_doc_card" href="/my/applications" title="My Applications">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <i class="fa fa-file-text-o fa-3x text-info mr-3" aria-hidden="true"></i>
-                                    <div>
-                                        <h5 class="card-title mb-0">My Applications</h5>
-                                        <p class="card-text text-muted small">
-                                            <span class="badge badge-pill badge-info"><t t-esc="application_count"/></span>
-                                            Lacak status lamaran pekerjaan Anda.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </t>
-        </xpath>
     </template>
 
     <template id="portal_my_applications_list" name="My Applications List">

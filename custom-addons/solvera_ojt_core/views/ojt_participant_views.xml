@@ -36,7 +36,8 @@
                             <button name="action_open_certificates" type="object" class="oe_stat_button" icon="fa-certificate">
                                 <span class="o_stat_text">Certificates</span>
                             </button>
-                            <button name="action_open_survey_results" type="object" class="oe_stat_button" icon="fa-question-circle" invisible="survey_count == 0">
+                            <button name="action_open_survey_results" type="object" class="oe_stat_button" icon="fa-question-circle" 
+                                    invisible="survey_count == 0">
                                 <field name="survey_count" widget="statinfo" string="Surveys"/>
                             </button>
                         </div>

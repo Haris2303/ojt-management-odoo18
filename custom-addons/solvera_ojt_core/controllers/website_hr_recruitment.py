@@ -7,15 +7,8 @@ class CustomWebsiteHrRecruitment(WebsiteHrRecruitment):
 
     @http.route('/jobs/apply/<model("hr.job"):job>', type='http', auth="public", website=True, sitemap=True)
     def jobs_apply(self, job, **post):
-        # --- PENGECEKAN LOGIN BARU ---
-        # request.session.uid akan kosong jika user belum login
         if not request.session.uid:
-            # Jika user belum login, arahkan ke halaman login.
-            # Parameter 'redirect' akan memberitahu Odoo untuk kembali ke halaman ini setelah login berhasil.
             return request.redirect('/web/login?redirect=%s' % request.httprequest.full_path)
-        # --- AKHIR PENGECEKAN ---
-
-        # Kode di bawah ini hanya akan berjalan jika user sudah login
         
         existing_applicants = request.env['hr.applicant'].sudo().search([])
 
