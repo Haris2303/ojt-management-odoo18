@@ -46,27 +46,51 @@ class HrApplicant(models.Model):
         action['context'] = {'active_ids': self.ids}
         return action
 
+    # def write(self, vals):
+    #     """
+    #     Otomatis membuat OJT Participant saat applicant dipindahkan ke stage 'Hired'.
+    #     """
+    #     # Panggil method write asli terlebih dahulu
+    #     res = super(HrApplicant, self).write(vals)
+
+    #     # Cek apakah stage diubah ke stage 'Hired'
+    #     if 'stage_id' in vals:
+    #         new_stage = self.env['hr.recruitment.stage'].browse(vals.get('stage_id'))
+    #         if new_stage and new_stage.hired_stage:
+    #             # Loop melalui setiap applicant yang diubah
+    #             for applicant in self:
+    #                 # Pastikan batch sudah dipilih
+    #                 if not applicant.batch_id:
+    #                     raise ValidationError(f"Pilih 'Target OJT Batch' terlebih dahulu untuk pelamar {applicant.name}.")
+                    
+    #                 # Panggil wizard untuk membuat participant dan mengirim email
+    #                 # Ini menggunakan kembali logika yang sudah ada di wizard
+    #                 self.env['hr.applicant.enroll.wizard'].create({
+    #                     'applicant_ids': [(4, applicant.id)],
+    #                     'batch_id': applicant.batch_id.id,
+    #                 }).action_enroll()
+    #     return res
+
     def write(self, vals):
-        """
-        Otomatis membuat OJT Participant saat applicant dipindahkan ke stage 'Hired'.
-        """
-        # Panggil method write asli terlebih dahulu
+        # Cek apakah 'stage_id' sedang diubah
+        if 'stage_id' in vals:
+            # Periksa "kunci rahasia". Jika kunci ini ada, lewati validasi.
+            if not self.env.context.get('enroll_from_wizard'):
+                new_stage = self.env['hr.recruitment.stage'].browse(vals.get('stage_id'))
+                # Ini adalah aturan validasi Anda yang sudah ada
+                if new_stage and 'ojt' in new_stage.name.lower():
+                    raise ValidationError("Anda tidak dapat memindahkan pelamar ke stage 'OJT' secara manual. Gunakan tombol 'Enroll to OJT' untuk melanjutkan.")
+
+        # Jalankan proses write asli (termasuk logika otomatisasi Anda)
         res = super(HrApplicant, self).write(vals)
 
-        # Cek apakah stage diubah ke stage 'Hired'
-        if 'stage_id' in vals:
-            new_stage = self.env['hr.recruitment.stage'].browse(vals.get('stage_id'))
-            if new_stage and new_stage.hired_stage:
-                # Loop melalui setiap applicant yang diubah
-                for applicant in self:
-                    # Pastikan batch sudah dipilih
-                    if not applicant.batch_id:
-                        raise ValidationError(f"Pilih 'Target OJT Batch' terlebih dahulu untuk pelamar {applicant.name}.")
-                    
-                    # Panggil wizard untuk membuat participant dan mengirim email
-                    # Ini menggunakan kembali logika yang sudah ada di wizard
-                    self.env['hr.applicant.enroll.wizard'].create({
-                        'applicant_ids': [(4, applicant.id)],
-                        'batch_id': applicant.batch_id.id,
-                    }).action_enroll()
+        # Lakukan pengecekan SETELAH data tersimpan
+        new_stage_after_write = self.env['hr.recruitment.stage'].browse(vals.get('stage_id')) if vals.get('stage_id') else None
+        for applicant in self:
+            if new_stage_after_write and new_stage_after_write.hired_stage and applicant.batch_id:
+                self.env['hr.applicant.enroll.wizard'].create({
+                    'applicant_ids': [(4, applicant.id)],
+                    'batch_id': applicant.batch_id.id,
+                }).action_enroll()
+                
         return res
