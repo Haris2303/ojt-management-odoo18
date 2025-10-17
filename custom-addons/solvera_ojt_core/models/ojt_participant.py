@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 class OjtParticipant(models.Model):
     _name = 'ojt.participant'
@@ -52,6 +53,27 @@ class OjtParticipant(models.Model):
     portal_token = fields.Char(string='Portal Access Token', index=True, copy=False)
     notes = fields.Text(string='Internal Notes')
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """
+        Override create untuk mencegah penambahan peserta ke batch yang terkunci.
+        """
+        for vals in vals_list:
+            if 'batch_id' in vals and vals['batch_id']:
+                # Ambil record batch berdasarkan ID yang diberikan
+                batch = self.env['ojt.batch'].browse(vals['batch_id'])
+                
+                # Periksa status batch
+                if batch.state in ['ongoing', 'done', 'cancel']:
+                    # Jika status terkunci, langsung gagalkan proses
+                    raise ValidationError(
+                        f"You cannot add new participants to the batch '{batch.name}' "
+                        f"because its status is '{batch.state}'."
+                    )
+                    
+        # Jika semua batch valid, lanjutkan proses pembuatan record
+        return super(OjtParticipant, self).create(vals_list)
     
     @api.depends('partner_id.name', 'batch_id.name')
     def _compute_name(self):
