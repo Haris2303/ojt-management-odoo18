@@ -3,6 +3,7 @@ from unittest.mock import patch
 from odoo.fields import Date
 from odoo.tests.common import TransactionCase
 from odoo.exceptions import ValidationError
+from odoo import fields
 
 class TestOjtBatch(TransactionCase):
     """
@@ -12,6 +13,13 @@ class TestOjtBatch(TransactionCase):
     def setUp(self, *args, **kwargs):
         """Siapkan data awal yang dibutuhkan untuk semua tes."""
         super(TestOjtBatch, self).setUp(*args, **kwargs)
+
+        self.batch = self.env['ojt.batch'].create({
+            'name': 'Test Batch for Email',
+            'start_date': fields.Date.today(),
+            'end_date': fields.Date.today(),
+            'state': 'recruit', # Mulai dari state 'recruit'
+        })
         
         # Buat sequence untuk kode batch agar tes tidak bergantung pada data yang ada
         self.env['ir.sequence'].create({
@@ -22,7 +30,15 @@ class TestOjtBatch(TransactionCase):
         })
 
         # Buat data partner dan participant untuk digunakan di berbagai tes
-        self.test_partner = self.env['res.partner'].create({'name': 'Test Participant Partner'})
+        self.test_partner = self.env['res.partner'].create({
+            'name': 'Test Participant Partner',
+            'email': 'ahostweb13@gmail.com'
+        })
+
+        self.participant = self.env['ojt.participant'].create({
+            'partner_id': self.test_partner.id,
+            'batch_id': self.batch.id
+        })
 
     def test_01_batch_creation_with_sequence(self):
         """Tes: Batch baru harus mendapatkan kode dari sequence."""
@@ -236,3 +252,94 @@ class TestOjtBatch(TransactionCase):
             })
         except ValidationError:
             self.fail("Seharusnya BISA menambahkan peserta ke batch yang masih 'draft'.")
+
+    def test_09_email_sent_on_batch_ongoing(self):
+        """
+        Tes Skenario: Email harus terkirim saat status batch diubah menjadi 'ongoing'.
+        """
+        # Hitung jumlah email yang ada di antrian sebelum aksi
+        initial_mail_count = self.env['mail.mail'].search_count([])
+
+        # Lakukan aksi: ubah status batch menjadi 'ongoing'
+        self.batch.action_ongoing()
+
+        # Hitung kembali jumlah email setelah aksi
+        final_mail_count = self.env['mail.mail'].search_count([])
+
+        # Verifikasi: Pastikan ada 1 email baru yang dibuat
+        self.assertEqual(final_mail_count, initial_mail_count + 1, 
+                            "Seharusnya ada satu email baru yang dibuat saat batch menjadi 'ongoing'.")
+
+        # Verifikasi Lanjutan: Periksa detail email yang terkirim
+        # Cari email terakhir yang dibuat
+        new_email = self.env['mail.mail'].search([], order='id desc', limit=1)
+        
+        self.assertEqual(new_email.email_to, self.test_partner.email,
+                            "Penerima email tidak sesuai.")
+        
+        self.assertIn(self.batch.name, new_email.subject,
+                        "Subjek email seharusnya mengandung nama batch.")
+    
+    def test_10_email_sent_on_batch_done(self):
+        """
+        Tes Skenario: Email harus terkirim ke setiap peserta saat status batch diubah menjadi 'done'.
+        """
+        # --- Arrange (Persiapan) ---
+        # Menghitung jumlah email yang ada di antrean sebelum aksi
+        initial_mail_count = self.env['mail.mail'].search_count([])
+
+        # --- Act (Aksi) ---
+        # Lakukan aksi: ubah status batch menjadi 'done'
+        self.batch.action_done()
+
+        # --- Assert (Verifikasi) ---
+        # Hitung kembali jumlah email setelah aksi
+        final_mail_count = self.env['mail.mail'].search_count([])
+
+        # 1. Verifikasi: Pastikan ada 1 email baru yang dibuat
+        self.assertEqual(final_mail_count, initial_mail_count + 1, 
+                            "Seharusnya ada satu email baru yang dibuat saat batch selesai (done).")
+
+        # 2. Verifikasi Lanjutan: Periksa detail email yang terkirim
+        # Cari email terakhir yang dibuat untuk memastikan kita memeriksa email yang benar
+        new_email = self.env['mail.mail'].search([], order='id desc', limit=1)
+        
+        # Periksa penerima
+        self.assertEqual(new_email.email_to, self.test_partner.email,
+                            "Penerima email tidak sesuai dengan email peserta.")
+        
+        # Periksa subjek email
+        self.assertIn("Selamat! Anda Telah Menyelesaikan Program OJT", new_email.subject,
+                        "Subjek email tidak sesuai dengan template untuk batch selesai.")
+        self.assertIn(self.batch.name, new_email.subject,
+                        "Subjek email seharusnya mengandung nama batch.")
+        
+        # Periksa body email, pastikan URL portal ada di dalamnya
+        self.assertIn('/my/dashboard?participant_id=', new_email.body_html,
+                        "Body email seharusnya mengandung link ke dashboard portal peserta.")
+        
+    def test_email_sent_on_survey_added(self):
+        """
+        Tes Skenario: Email harus terkirim saat survei ditambahkan ke batch untuk pertama kalinya.
+        """
+        # --- Arrange ---
+        # Buat data yang diperlukan
+        survey = self.env['survey.survey'].create({'title': 'Survei Kepuasan OJT'})
+        partner = self.env['res.partner'].create({'name': 'Peserta Survei', 'email': 'survey.participant@example.com'})
+        participant = self.env['ojt.participant'].create({'partner_id': partner.id, 'batch_id': self.batch.id})
+
+        self.assertFalse(self.batch.survey_id, "Batch seharusnya belum memiliki survei di awal.")
+        initial_mail_count = self.env['mail.mail'].search_count([])
+
+        # --- Act ---
+        # Mentor menambahkan survei ke batch
+        self.batch.write({'survey_id': survey.id})
+
+        # --- Assert ---
+        final_mail_count = self.env['mail.mail'].search_count([])
+        self.assertEqual(final_mail_count, initial_mail_count + 1, "Seharusnya ada 1 email baru yang dibuat.")
+
+        new_email = self.env['mail.mail'].search([], order='id desc', limit=1)
+        self.assertEqual(new_email.email_to, partner.email)
+        self.assertIn("Undangan Mengisi Survei", new_email.subject)
+        self.assertIn('/survey/start/', new_email.body_html)

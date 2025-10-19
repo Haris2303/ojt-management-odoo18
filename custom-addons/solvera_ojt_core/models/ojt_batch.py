@@ -59,13 +59,29 @@ class OjtBatch(models.Model):
             if batch.start_date and batch.end_date and batch.start_date > batch.end_date:
                 raise ValidationError("The start date cannot be later than the end date.")
 
-    @api.model
-    def create(self, vals):
-        if vals.get('code', '/') == '/':
-            vals['code'] = self.env['ir.sequence'].next_by_code('ojt.batch') or '/'
-        return super(OjtBatch, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('code', '/') == '/':
+                vals['code'] = self.env['ir.sequence'].next_by_code('ojt.batch') or '/'
+        batches = super(OjtBatch, self).create(vals_list)
+        
+        batches_with_survey = batches.filtered(lambda b: b.survey_id)
+        if batches_with_survey:
+            batches_with_survey._send_survey_notification()
+        
+        return batches
 
     def write(self, vals):
+        batches_starting = self.browse()
+        if 'state' in vals and vals['state'] == 'ongoing':
+            batches_starting = self.filtered(lambda b: b.state != 'ongoing')
+
+        # Reverts 'completed' participants back to 'active' when moved batch from 'done' back to 'draft' or 'recruit'.
+        batches_with_new_survey = self.browse()
+        if 'survey_id' in vals and vals.get('survey_id'):
+            batches_with_new_survey = self.filtered(lambda b: not b.survey_id)
+
         if 'state' in vals:
             new_state = vals['state']
             for batch in self:
@@ -73,7 +89,51 @@ class OjtBatch(models.Model):
                     participants_to_revert = batch.participant_ids.filtered(lambda p: p.state == 'completed')
                     if participants_to_revert:
                         participants_to_revert.write({'state': 'active'})
-        return super(OjtBatch, self).write(vals)
+        
+        res = super(OjtBatch, self).write(vals)
+
+        # Sends a "Batch Started" notification email
+        if batches_starting:
+            template = self.env.ref('solvera_ojt_core.mail_template_batch_ongoing', raise_if_not_found=False)
+            if template:
+                for batch in batches_starting:
+                    for participant in batch.participant_ids:
+                        if participant.partner_id.email:
+                            participant.sudo()._compute_access_url()
+                            portal_url = participant.get_portal_url(query_string=f'participant_id={participant.id}')
+                            email_context = {
+                                'url_portal_batch': portal_url
+                            }
+                            template.with_context(**email_context).send_mail(
+                                participant.id, 
+                                force_send=True
+                            )
+
+        if batches_with_new_survey:
+            batches_with_new_survey._send_survey_notification()
+
+        return res
+    
+    def _send_survey_notification(self):
+        """Mengirim notifikasi email kepada peserta untuk mengisi survei."""
+        template = self.env.ref('solvera_ojt_core.mail_template_batch_survey', raise_if_not_found=False)
+        if not template:
+            _logger.error("Template email 'mail_template_batch_survey' tidak ditemukan.")
+            return
+
+        for batch in self:
+            if not batch.survey_id:
+                continue
+
+            survey_url = batch.survey_id.get_start_url()
+            
+            for participant in batch.participant_ids:
+                if participant.partner_id.email:
+                    email_context = {'url_survey': survey_url}
+                    template.with_context(**email_context).send_mail(
+                        participant.id, 
+                        force_send=True
+                    )
 
     @api.depends('participant_ids', 'event_link_ids')
     def _compute_counts(self):
@@ -98,7 +158,31 @@ class OjtBatch(models.Model):
 
     def action_done(self):
         self.participant_ids.write({'state': 'completed'})
+
+        # call method send email
+        self._send_batch_done_notifications()
+
         return self.write({'state': 'done'})
+    
+    def _send_batch_done_notifications(self):
+        template = self.env.ref('solvera_ojt_core.mail_template_batch_done', raise_if_not_found=False)
+        
+        if not template:
+            return
+
+        for batch in self:
+            for participant in batch.participant_ids:
+                if not participant.partner_id.email:
+                    continue 
+
+                participant.sudo()._compute_access_url()
+                portal_url = participant.get_portal_url(query_string=f'participant_id={participant.id}')
+                
+                template_ctx = {'url_portal_batch': portal_url}
+                template.with_context(template_ctx).send_mail(
+                    participant.id,
+                    force_send=True
+                )
 
     @api.model
     def _cron_update_batch_states(self):

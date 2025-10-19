@@ -99,3 +99,35 @@ class TestOjtParticipant(TransactionCase):
                 'batch_id': self.batch.id,
                 'partner_id': self.env['res.partner'].create({'name': 'Peserta Terlambat'}).id,
             })
+
+    def test_05_email_sent_on_mentor_score(self):
+        """
+        Tes: Email harus terkirim saat mentor_score diisi untuk pertama kali, tapi tidak saat dikoreksi.
+        """
+        # --- Bagian 1: Tes pengiriman email saat nilai pertama kali diberikan ---
+        participant = self.env['ojt.participant'].create({
+            'batch_id': self.batch.id,
+            'partner_id': self.partner.id,
+        })
+        self.assertEqual(participant.mentor_score, 0.0, "Skor awal seharusnya 0.")
+        initial_mail_count = self.env['mail.mail'].search_count([])
+
+        # Aksi: Mentor memberikan nilai
+        participant.write({'mentor_score': 90.0})
+
+        # Verifikasi
+        final_mail_count = self.env['mail.mail'].search_count([])
+        self.assertEqual(final_mail_count, initial_mail_count + 1, "Seharusnya ada 1 email baru yang dibuat saat skor pertama kali diberikan.")
+
+        new_email = self.env['mail.mail'].search([], order='id desc', limit=1)
+        self.assertEqual(new_email.email_to, self.partner.email)
+        self.assertIn("Evaluasi Akhir dari Mentor", new_email.subject)
+        self.assertIn("90", new_email.body_html)
+
+        # --- Bagian 2: Tes TIDAK ada email saat nilai dikoreksi ---
+        # Aksi: Mentor mengoreksi nilai dari 90 menjadi 95
+        participant.write({'mentor_score': 95.0})
+
+        # Verifikasi
+        count_after_correction = self.env['mail.mail'].search_count([])
+        self.assertEqual(count_after_correction, final_mail_count, "Seharusnya TIDAK ada email baru yang dibuat saat skor dikoreksi.")

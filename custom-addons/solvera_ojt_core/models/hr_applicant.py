@@ -9,6 +9,7 @@ class HrApplicant(models.Model):
                                 domain="[('state', 'in', ['draft', 'recruit'])]")
     
     portal_status = fields.Selection([
+        ('new', 'New'),
         ('pending', 'Pending'),
         ('shortlisted', 'In Process'),
         ('accepted', 'Accepted'),
@@ -58,6 +59,8 @@ class HrApplicant(models.Model):
         for applicant in self:
             if applicant.stage_id.hired_stage:
                 applicant.portal_status = 'accepted'
+            elif applicant.stage_id.sequence == 0:
+                applicant.portal_status = 'new'
             elif applicant.stage_id.sequence == 1: # Asumsi stage pertama adalah 'Pending'
                 applicant.portal_status = 'pending'
             # Anda perlu cara untuk menandai stage 'Rejected'. 

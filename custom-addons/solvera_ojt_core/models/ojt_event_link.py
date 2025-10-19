@@ -9,6 +9,7 @@ except ImportError:
     qrcode = None
     logging.getLogger(__name__).warning("The 'qrcode' library is not installed. QR code generation will be disabled.")
 
+from odoo.exceptions import ValidationError
 from odoo import models, fields, api
 
 class OjtEventLink(models.Model):
@@ -40,6 +41,18 @@ class OjtEventLink(models.Model):
     participant_count = fields.Integer(compute='_compute_related_counts')
     attendance_count = fields.Integer(compute='_compute_related_counts')
     assignment_count = fields.Integer(compute='_compute_related_counts')
+
+    @api.constrains('date_start', 'date_end')
+    def _check_dates(self):
+        for record in self:
+            # Pastikan date_start tidak di masa lalu
+            if record.date_start and record.date_start < fields.Datetime.now():
+                raise ValidationError("Tanggal mulai (Date Start) tidak boleh di masa lalu!")
+
+            # Pastikan date_end tidak sebelum date_start
+            if record.date_start and record.date_end and record.date_end < record.date_start:
+                raise ValidationError("Tanggal berakhir (Date End) tidak boleh sebelum tanggal mulai (Date Start)!")
+
 
     @api.depends('batch_id.participant_ids', 'event_id')
     def _compute_related_counts(self):

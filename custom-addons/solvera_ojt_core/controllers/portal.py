@@ -174,7 +174,7 @@ class OjtCustomerPortal(CustomerPortal):
         participant = request.env['ojt.participant'].search([
             ('partner_id', '=', request.env.user.partner_id.id),
             ('batch_id', '=', assignment.batch_id.id),
-            ('state', '=', 'active')
+            ('state', 'in', ['active', 'completed'])
         ], limit=1)
 
         if not participant:
@@ -210,7 +210,7 @@ class OjtCustomerPortal(CustomerPortal):
         participant = request.env['ojt.participant'].search([
             ('partner_id', '=', request.env.user.partner_id.id),
             ('batch_id', '=', assignment.batch_id.id),
-            ('state', '=', 'active')
+            ('state', 'in', ['active', 'completed'])
         ], limit=1)
 
         if not participant:
