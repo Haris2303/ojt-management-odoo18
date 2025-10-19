@@ -7,7 +7,6 @@
             <field name="inherit_id" ref="event.view_event_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='address_id']" position="after">
-                    <field name="online_meeting_url" widget="url" placeholder="e.g. https://meet.google.com/xxx-xxx-xxx"/>
                 </xpath>
             </field>
         </record>

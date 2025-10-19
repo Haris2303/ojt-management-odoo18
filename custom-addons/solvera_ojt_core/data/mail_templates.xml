@@ -56,11 +56,13 @@
                     <li><strong>Topik:</strong> <span t-out="object.event_id.name"/></li>
                     <li>
                         <strong>Waktu:</strong>
-                        <span t-out="object.event_id.date_begin"/>
+                        <span t-field="object.date_start" t-options='{"widget": "datetime"}'/>
                     </li>
-                    <li t-if="object.event_id.online_meeting_url">
+
+                    <t t-set="meeting_link" t-value="object.online_meeting_url or object.event_id.meeting_url"/>
+                    <li t-if="meeting_link">
                         <strong>Link Meeting:</strong> 
-                        <a t-att-href="object.event_id.online_meeting_url">Klik di sini untuk bergabung</a>
+                        <a t-att-href="meeting_link">Klik di sini untuk bergabung</a>
                     </li>
                 </ul>
                 <p>

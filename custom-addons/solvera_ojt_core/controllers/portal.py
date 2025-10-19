@@ -27,6 +27,22 @@ class OjtCustomerPortal(CustomerPortal):
         })
         return values
     
+    @http.route(['/my/menu'], type='http', auth='user', website=True)
+    def portal_my_account(self, **kw):
+        participant_count = request.env['ojt.participant'].search_count([
+            ('partner_id', '=', request.env.user.partner_id.id),
+            ('state', 'in', ['active', 'completed'])
+        ])
+        
+        user_partner = request.env.user.partner_id
+        application_count = request.env['hr.applicant'].search_count([
+            ('partner_id', '=', user_partner.id)
+        ])
+        return request.render('solvera_ojt_core.portal_my_account_ojt_menu', {
+            'ojt_count': participant_count,
+            'application_count': application_count,
+        })
+    
     @http.route(['/ojt/attend/<int:event_link_id>'], type='http', auth="user", website=True)
     def ojt_qr_checkin(self, event_link_id, **kw):
         event_link = request.env['ojt.event.link'].sudo().browse(event_link_id)

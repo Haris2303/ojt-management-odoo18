@@ -31,9 +31,9 @@ class OjtEventLink(models.Model):
         string='Online Meeting URL',
         help="Override/shortcut for the meeting link. If empty, the link from the event will be used.")
 
-    title = fields.Char(string='Title', related='event_id.name', readonly=False)
-    date_start = fields.Datetime(string='Date Start', related='event_id.date_begin', readonly=False)
-    date_end = fields.Datetime(string='Date End', related='event_id.date_end', readonly=False)
+    title = fields.Char(string='Title', related='event_id.name', readonly=True)
+    date_start = fields.Datetime(string='Date Start', related='event_id.date_begin', readonly=True)
+    date_end = fields.Datetime(string='Date End', related='event_id.date_end', readonly=True)
     instructor_id = fields.Many2one('res.partner', string='Instructor / Speaker')
     notes = fields.Text(string='Notes')
     qr_code_image = fields.Binary("QR Code", compute='_compute_qr_code')
@@ -45,11 +45,6 @@ class OjtEventLink(models.Model):
     @api.constrains('date_start', 'date_end')
     def _check_dates(self):
         for record in self:
-            # Pastikan date_start tidak di masa lalu
-            if record.date_start and record.date_start < fields.Datetime.now():
-                raise ValidationError("Tanggal mulai (Date Start) tidak boleh di masa lalu!")
-
-            # Pastikan date_end tidak sebelum date_start
             if record.date_start and record.date_end and record.date_end < record.date_start:
                 raise ValidationError("Tanggal berakhir (Date End) tidak boleh sebelum tanggal mulai (Date Start)!")
 
@@ -73,7 +68,7 @@ class OjtEventLink(models.Model):
             else:
                 rec.qr_code_image = False
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
         """ On creation, send a notification email to all participants of the batch. """
         new_event_link = super(OjtEventLink, self).create(vals)
