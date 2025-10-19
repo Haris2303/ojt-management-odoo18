@@ -16,7 +16,10 @@ class OjtCustomerPortal(CustomerPortal):
             ('state', 'in', ['active', 'completed'])
         ])
         
-        application_count = request.env['hr.applicant'].search_count([])
+        user_partner = request.env.user.partner_id
+        application_count = request.env['hr.applicant'].search_count([
+            ('partner_id', '=', user_partner.id)
+        ])
         
         values.update({
             'ojt_count': participant_count,

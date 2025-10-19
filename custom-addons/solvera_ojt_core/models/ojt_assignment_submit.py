@@ -20,7 +20,7 @@ class OjtAssignmentSubmit(models.Model):
         'submit_id', 'attachment_id', string='Attachments')
     url_link = fields.Char(string='URL Link', help="For submissions like Git, Figma, video, etc.")
     
-    score = fields.Float(string='Score', tracking=True) # Ditambahkan tracking
+    score = fields.Float(string='Score', tracking=True)
     reviewer_id = fields.Many2one('res.users', string='Reviewer', default=lambda self: self.env.user, tracking=True)
     feedback = fields.Html(string='Feedback')
     

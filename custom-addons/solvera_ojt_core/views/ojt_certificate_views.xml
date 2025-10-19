@@ -10,7 +10,7 @@
                 <field name="participant_id"/>
                 <field name="batch_id"/>
                 <field name="serial"/>
-                <field name="issued_on"/>
+                <field name="issued_date"/>
                 <field name="grade"/>
                 <field name="state" widget="badge" decoration-success="state == 'issued'" decoration-danger="state == 'revoked'"/>
             </list>
@@ -38,7 +38,7 @@
                             <field name="partner_id"/>
                         </group>
                         <group>
-                            <field name="issued_on"/>
+                            <field name="issued_date"/>
                             <field name="grade"/>
                             <field name="final_score"/>
                             <field name="attendance_rate"/>

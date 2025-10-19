@@ -5,7 +5,11 @@
             <div class="page" style="font-family: 'Helvetica', sans-serif; padding: 40px; border: 10px solid #00A09D; height: 100%;">
                 <t t-foreach="docs" t-as="doc">
                     <div class="text-center">
-                        <h1 style="color: #00A09D; font-size: 48px; font-weight: bold; margin-top: 60px;">Certificate of Completion</h1>
+                        <div>
+                            <img t-if="doc.batch_id.company_id.logo" t-att-src="image_data_uri(doc.batch_id.company_id.logo)" style="max-height: 80px; margin-bottom: 20px;" alt="Company Logo"/>
+                        </div>
+
+                        <h1 style="color: #00A09D; font-size: 48px; font-weight: bold; margin-top: 20px;">Certificate of Completion</h1>
                         
                         <p style="font-size: 18px; margin-top: 40px;">This certificate is awarded to</p>
                         
@@ -26,18 +30,15 @@
                         </h3>
                         
                         <p style="font-size: 16px; margin-top: 50px;">
-                            <t t-if="doc.issued_on">
-                                Issued on: <span t-esc="doc.issued_on.strftime('%B %d, %Y')"/>
+                            <t t-if="doc.issued_date">
+                                Issued on: <span t-esc="doc.issued_date.strftime('%B %d, %Y')"/>
                             </t>
                         </p>
                         
-                        <div style="margin-top: 80px; display: flex; justify-content: space-around; text-align: center;">
+                        <div style="margin-top: 60px; display: flex; justify-content: space-around; text-align: center;">
                             <div>
                                 <p t-if="doc.final_score or doc.final_score == 0"><strong>Final Score:</strong> <t t-esc="'%.2f' % doc.final_score"/></p>
                                 <p t-if="doc.grade"><strong>Grade:</strong> <t t-esc="doc.grade"/></p>
-                            </div>
-                            <div>
-                                <p t-if="doc.attendance_rate or doc.attendance_rate == 0"><strong>Attendance:</strong> <t t-esc="'%.1f' % doc.attendance_rate"/>%</p>
                             </div>
                             <div>
                                 <t t-if="doc.serial">Serial Number: <t t-esc="doc.serial"/></t>

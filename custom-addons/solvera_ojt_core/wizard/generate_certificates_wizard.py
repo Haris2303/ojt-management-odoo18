@@ -1,3 +1,4 @@
+import uuid
 from odoo import models, fields, api
 
 class GenerateCertificatesWizard(models.TransientModel):
@@ -40,8 +41,10 @@ class GenerateCertificatesWizard(models.TransientModel):
         self.ensure_one()
 
         template = self.env.ref('solvera_ojt_core.mail_template_certificate_issued', raise_if_not_found=False)
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         
         for participant in self.eligible_participant_ids:
+            access_token = str(uuid.uuid4())
             existing_certificate = self.env['ojt.certificate'].search([
                 ('participant_id', '=', participant.id)
             ])
@@ -57,10 +60,13 @@ class GenerateCertificatesWizard(models.TransientModel):
                 'participant_id': participant.id,
                 'batch_id': self.batch_id.id,
                 'state': 'issued',
+                'access_token': access_token
             })
 
             if template and new_certificate:
                 new_certificate.action_issue()
-                template.send_mail(new_certificate.id, force_send=True)
+                download_url = f"{base_url}/my/certificate/download/{new_certificate.id}?access_token={access_token}"
+                tmp_ctx = {'url_certificate_download': download_url}
+                template.with_context(tmp_ctx).send_mail(new_certificate.id, force_send=True)
         
         return {'type': 'ir.actions.act_window_close'}

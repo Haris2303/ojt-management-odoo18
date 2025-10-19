@@ -88,7 +88,7 @@
                     Anda bisa mengunduh sertifikat Anda melalui portal peserta atau melalui tautan langsung di bawah ini.
                 </p>
                 <div style="margin: 16px 0px 16px 0px;">
-                    <a href="/my/home"
+                    <a t-att-href="ctx.get('url_certificate_download')"
                         style="background-color: #875A7B; padding: 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;">
                         Unduh Sertifikat Anda
                     </a>
