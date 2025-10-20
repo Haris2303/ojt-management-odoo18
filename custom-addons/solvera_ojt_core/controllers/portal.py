@@ -8,40 +8,24 @@ from odoo.addons.portal.controllers.portal import CustomerPortal
 
 class OjtCustomerPortal(CustomerPortal):
 
-    def _prepare_home_portal_values(self, counters):
-        values = super(OjtCustomerPortal, self)._prepare_home_portal_values(counters)
+    # def _prepare_home_portal_values(self, counters):
+    #     values = super(OjtCustomerPortal, self)._prepare_home_portal_values(counters)
         
-        participant_count = request.env['ojt.participant'].search_count([
-            ('partner_id', '=', request.env.user.partner_id.id),
-            ('state', 'in', ['active', 'completed'])
-        ])
+    #     participant_count = request.env['ojt.participant'].search_count([
+    #         ('partner_id', '=', request.env.user.partner_id.id),
+    #         ('state', 'in', ['active', 'completed'])
+    #     ])
         
-        user_partner = request.env.user.partner_id
-        application_count = request.env['hr.applicant'].search_count([
-            ('partner_id', '=', user_partner.id)
-        ])
+    #     user_partner = request.env.user.partner_id
+    #     application_count = request.env['hr.applicant'].search_count([
+    #         ('partner_id', '=', user_partner.id)
+    #     ])
         
-        values.update({
-            'ojt_count': participant_count,
-            'application_count': application_count,
-        })
-        return values
-    
-    @http.route(['/my/menu'], type='http', auth='user', website=True)
-    def portal_my_account(self, **kw):
-        participant_count = request.env['ojt.participant'].search_count([
-            ('partner_id', '=', request.env.user.partner_id.id),
-            ('state', 'in', ['active', 'completed'])
-        ])
-        
-        user_partner = request.env.user.partner_id
-        application_count = request.env['hr.applicant'].search_count([
-            ('partner_id', '=', user_partner.id)
-        ])
-        return request.render('solvera_ojt_core.portal_my_account_ojt_menu', {
-            'ojt_count': participant_count,
-            'application_count': application_count,
-        })
+    #     values.update({
+    #         'ojt_count': participant_count,
+    #         'application_count': application_count,
+    #     })
+    #     return values
     
     @http.route(['/ojt/attend/<int:event_link_id>'], type='http', auth="user", website=True)
     def ojt_qr_checkin(self, event_link_id, **kw):
@@ -150,12 +134,18 @@ class OjtCustomerPortal(CustomerPortal):
                     'is_done': survey.id in completed_survey_ids,
                 })
 
+        certificate_data = request.env['ojt.certificate'].sudo().search([
+            ('participant_id', '=', participant_to_show.id),
+            ('state', '=', 'issued')
+        ], limit=1)
+
         values = {
             'participant': participant_to_show,
             'progress_data': progress_data,
             'assignments': all_assignments,
             'agenda_items': agenda_items,
             'survey_data': survey_data,
+            'certificate_data': certificate_data,
             'page_name': 'dashboard',
         }
         return request.render("solvera_ojt_core.portal_participant_dashboard", values)
@@ -170,7 +160,7 @@ class OjtCustomerPortal(CustomerPortal):
         participant = request.env['ojt.participant'].search([
             ('partner_id', '=', request.env.user.partner_id.id),
             ('batch_id', '=', event_link.batch_id.id),
-            ('state', '=', 'active')
+            ('state', '=', ['active', 'completed'])
         ], limit=1)
 
         if not participant:
@@ -287,29 +277,6 @@ class OjtCustomerPortal(CustomerPortal):
             ('Content-Disposition', f'attachment; filename="Certificate-{certificate.name}.pdf"')
         ]
         return request.make_response(pdf, headers=pdf_http_headers)
-    
-    @http.route(['/my/certificates'], type='http', auth="user", website=True)
-    def portal_my_certificates(self, **kw):
-        participants = request.env['ojt.participant'].search([
-            ('partner_id', '=', request.env.user.partner_id.id)
-        ])
-        
-        values = {
-            'participants': participants,
-            'page_name': 'certificates',
-        }
-        return request.render("solvera_ojt_core.portal_my_certificates", values)
-    
-    @http.route(['/ojt/programs'], type='http', auth="public", website=True)
-    def ojt_program_list(self, **kw):
-        active_batches = request.env['ojt.batch'].search([
-            ('state', 'in', ['recruit', 'ongoing'])
-        ])
-        
-        values = {
-            'batches': active_batches,
-        }
-        return request.render("solvera_ojt_core.ojt_program_list_template", values)
 
     @http.route(['/ojt/cert/verify'], type='http', auth="public", website=True)
     def ojt_certificate_verify(self, token=None, **kw):
@@ -325,13 +292,3 @@ class OjtCustomerPortal(CustomerPortal):
             'token': token,
         }
         return request.render("solvera_ojt_core.ojt_certificate_verification_page", values)
-
-    @http.route(['/my/applications'], type='http', auth="user", website=True)
-    def portal_my_applications(self, **kw):
-        applications = request.env['hr.applicant'].search([])
-        
-        values = {
-            'applications': applications,
-            'page_name': 'applications',
-        }
-        return request.render("solvera_ojt_core.portal_my_applications_list", values)

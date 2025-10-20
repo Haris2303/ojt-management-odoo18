@@ -1,6 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <data>
+        <record id="portal_user_dropdown_inherit_dashboard" model="ir.ui.view">
+            <field name="name">portal.user.dropdown.inherit.dashboard</field>
+            <field name="inherit_id" ref="portal.user_dropdown"/>
+            <field name="arch" type="xml">
+                
+                <xpath expr="//div[@id='o_logout_divider']" position="before">
+                    
+                    <a href="/my" role="menuitem" class="dropdown-item ps-3">
+                        <i class="fa fa-fw fa-id-card-o me-1 small text-primary text-primary-emphasis"/> My Account
+                    </a>
+                    
+                    <a href="/my/dashboard" role="menuitem" class="dropdown-item ps-3">
+                        <i class="fa fa-fw fa-tachometer-alt me-1 small text-primary text-primary-emphasis"/> My Dashboard
+                    </a>
+
+                </xpath>
+
+            </field>
+        </record>
+    </data>
+
     <template id="portal_template_qr_feedback">
         <t t-call="website.layout">
             <div id="wrap">
@@ -126,127 +148,98 @@
                         </t>
                     </div>
                 </div>
+
+                <!-- Certificate -->
+                <div class="mt-5">
+                    <h4 class="border-start border-4 border-primary ps-2 fw-semibold mb-3">Sertifikat</h4>
+                    <div class="list-group">
+                        <div class="card mb-3 border-0 shadow-sm rounded-3 certificate-card">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">Program: <strong><t t-esc="participant.batch_id.name"/></strong></h5>
+                                    <small class="text-muted">
+                                        Status: 
+                                        <t t-if="certificate_data and certificate_data.state == 'issued'">
+                                            <span class="badge bg-success certificate-badge">Telah Terbit</span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="badge bg-secondary certificate-badge">Belum Tersedia</span>
+                                        </t>
+                                    </small>
+                                </div>
+                                <div>
+                                    <t t-if="certificate_data and certificate_data.state == 'issued'">
+                                        <a t-attf-href="/my/certificate/download/#{certificate_data.id}" class="btn btn-primary btn-sm">
+                                            <i class="fa fa-download"></i> Unduh Sertifikat
+                                        </a>
+                                    </t>
+                                    <t t-else="">
+                                        <button class="btn btn-outline-secondary btn-sm" disabled="disabled">
+                                            <i class="fa fa-clock"></i> Menunggu Terbit
+                                        </button>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </t>
     </template>
-
-    <template id="portal_my_account_ojt_menu" name="My Account OJT Menu">
-        <t t-call="portal.portal_layout">
-            <t t-if="ojt_count or application_count">
-                <div class="o_portal_category row g-2 mt-4">
-                    
-                    <!-- OJT Dashboard -->
-                    <t t-if="ojt_count">
-                        <div class="o_portal_index_card col-md-6 order-2">
-                            <a class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none bg-100 shadow-sm hover-shadow-lg" 
-                            href="/my/dashboard" title="OJT Dashboard">
-                                <i class="fa fa-tachometer fa-3x text-primary me-3" aria-hidden="true"></i>
-                                <div>
-                                    <h5 class="card-title mb-0 fw-semibold">OJT Dashboard</h5>
-                                    <p class="card-text text-muted small">Lihat progres, tugas, dan jadwal Anda.</p>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- Sertifikat Saya -->
-                        <div class="o_portal_index_card col-md-6 order-2">
-                            <a class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none bg-100 shadow-sm hover-shadow-lg"
-                            href="/my/certificates" title="Sertifikat Saya">
-                                <i class="fa fa-certificate fa-3x text-success me-3" aria-hidden="true"></i>
-                                <div>
-                                    <h5 class="card-title mb-0 fw-semibold">Sertifikat Saya</h5>
-                                    <p class="card-text text-muted small">Lihat dan unduh sertifikat OJT Anda.</p>
-                                </div>
-                            </a>
-                        </div>
-                    </t>
-
-                    <!-- My Applications -->
-                    <t t-if="application_count">
-                        <div class="o_portal_index_card col-md-6 order-2">
-                            <a class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none bg-100 shadow-sm hover-shadow-lg"
-                            href="/my/applications" title="My Applications">
-                                <i class="fa fa-file-text-o fa-3x text-info me-3" aria-hidden="true"></i>
-                                <div>
-                                    <h5 class="card-title mb-0 fw-semibold">My Applications</h5>
-                                    <p class="card-text text-muted small">
-                                        <span class="badge bg-info rounded-pill me-1"><t t-esc="application_count"/></span>
-                                        Lacak status lamaran pekerjaan Anda.
-                                    </p>
-                                </div>
-                            </a>
-                        </div>
-                    </t>
-
-                </div>
-            </t>
-        </t>
-    </template>
-
-    <!-- <template id="portal_my_home_add_ojt_dashboard_link" inherit_id="portal.portal_my_home" name="Portal My Home: OJT Dashboard">
-        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
-            <t t-if="ojt_count">
-                <div class="o_portal_category row g-2 mt-3">
-                    <div class="o_portal_index_card col-md-6 order-2">
-                        <a class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none bg-100" href="/my/dashboard" title="OJT Dashboard">
-                            <i class="fa fa-tachometer fa-3x text-primary me-3" aria-hidden="true"/>
-                            <div>
-                                <h5 class="card-title mb-0">OJT Dashboard</h5>
-                                <p class="card-text text-muted small">Lihat progres, tugas, dan jadwal Anda.</p>
-                            </div>
-                        </a>
-                    </div>
-                
-                    <div class="o_portal_index_card col-md-6 order-2">
-                        <a class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none bg-100" href="/my/certificates" title="My Certificates">
-                            <i class="fa fa-certificate fa-3x text-success me-3" aria-hidden="true"></i>
-                            <div>
-                                <h5 class="card-title mb-0">Sertifikat Saya</h5>
-                                <p class="card-text text-muted small">Lihat dan unduh sertifikat OJT Anda.</p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </t>
-
-            <t t-if="application_count">
-                <div class="o_portal_index_card row g-2 mt-3">
-                    <div class="col-md-6 order-2">
-                        <a class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none bg-100" 
-                            href="/my/applications" title="My Applications">
-                            <i class="fa fa-file-text-o fa-3x text-info me-3" aria-hidden="true"></i>
-                            <div>
-                                <h5 class="card-title mb-0">My Applications</h5>
-                                <p class="card-text text-muted small">
-                                    <span class="badge badge-pill badge-info"><t t-esc="application_count"/></span>
-                                    Lacak status lamaran pekerjaan Anda.
-                                </p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </t>
-
-        </xpath>
-    </template> -->
 
     <template id="portal_participant_batch_selection" name="Select OJT Batch">
         <t t-call="portal.portal_layout">
             <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('Select Batch', '/my/dashboard')]"/>
-            
-            <div class="container">
-                <h3 class="mt-4">Pilih Batch OJT</h3>
-                <p>Anda terdaftar di beberapa program OJT. Silakan pilih batch mana yang ingin Anda lihat detailnya.</p>
-                
-                <div class="list-group mt-4">
-                    <a t-foreach="participants" t-as="participant"
-                        t-attf-href="/my/dashboard?participant_id=#{participant.id}"
-                        class="list-group-item list-group-item-action">
-                        <h5 class="mb-1"><t t-esc="participant.batch_id.name"/></h5>
-                        <small>Status: <t t-esc="participant.state"/></small>
+
+            <div class="container ojt-container my-5" style="max-width:880px;">
+                <h2 class="fw-bold text-center mb-3" style="color:#0056b3;">Pilih Batch OJT Anda</h2>
+                <p class="text-muted text-center mb-5">
+                    Anda terdaftar di beberapa program OJT. Pilih batch untuk melihat detailnya.
+                </p>
+
+                <div class="row g-4">
+                    <t t-foreach="participants" t-as="participant">
+                        <div class="col-md-6">
+                            <a t-attf-href="/my/dashboard?participant_id=#{participant.id}" class="text-decoration-none">
+                                <div class="card-hover batch-card d-flex align-items-center p-3" 
+                                    style="background:#fff;border:none;border-radius:12px;transition:all 0.25s ease;">
+                                    <div class="batch-icon me-3" 
+                                        style="width:55px;height:55px;background:linear-gradient(135deg,#007bff,#0056b3);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;">
+                                        <i class="fa fa-users"/>
+                                    </div>
+                                    <div>
+                                        <div class="batch-name fw-semibold mb-1" style="color:#0056b3;">
+                                            <t t-esc="participant.batch_id.name"/>
+                                        </div>
+                                        <div class="status-text text-muted" style="font-size:0.9rem;">
+                                            Status: <t t-esc="participant.state"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="/my/account" class="text-decoration-none" style="color:#0056b3;font-weight:500;">
+                        <i class="fa fa-arrow-left"></i> Kembali ke Akun Saya
                     </a>
                 </div>
             </div>
+            <style>
+                .card-hover {
+                    transition: all 0.3s ease;
+                    background-color: #fff;
+                    border: none;
+                    border-radius: 16px;
+                    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+                }
+                .card-hover:hover {
+                    transform: translateY(-6px);
+                    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+                }
+            </style>
         </t>
     </template>
 
@@ -399,87 +392,4 @@
         </t>
     </template>
 
-    <template id="portal_my_certificates" name="My Certificates">
-        <t t-call="portal.portal_layout">
-            <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('My Certificates', '/my/certificates')]"/>
-
-            <div class="container py-5">
-                <h2 class="mb-4 fw-bold text-primary"><i class="fa fa-certificate"></i> Sertifikat OJT Anda</h2>
-
-                <t t-if="not participants">
-                    <div class="alert alert-info">Anda belum terdaftar di program OJT manapun.</div>
-                </t>
-
-                <div t-if="participants" class="mt-4">
-                    <div t-foreach="participants" t-as="participant" class="card mb-3 border-0 shadow-sm rounded-3 certificate-card">
-                        <t t-set="certificate" t-value="participant.certificate_ids[:1]"/>
-
-                        <div class="card-body d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="mb-1">Program: <strong><t t-esc="participant.batch_id.name"/></strong></h5>
-                                <small class="text-muted">
-                                    Status:
-                                    <t t-if="certificate and certificate.state == 'issued'">
-                                        <span class="badge bg-success certificate-badge">Telah Terbit</span>
-                                    </t>
-                                    <t t-else="">
-                                        <span class="badge bg-secondary certificate-badge">Belum Tersedia</span>
-                                    </t>
-                                </small>
-                            </div>
-                            <div>
-                                <t t-if="certificate and certificate.state == 'issued'">
-                                    <a t-attf-href="/my/certificate/download/#{certificate.id}" class="btn btn-primary btn-sm">
-                                        <i class="fa fa-download"></i> Unduh Sertifikat
-                                    </a>
-                                </t>
-                                <t t-else="">
-                                    <button class="btn btn-outline-secondary btn-sm" disabled="disabled">
-                                        <i class="fa fa-clock"></i> Menunggu Terbit
-                                    </button>
-                                </t>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </t>
-    </template>
-
-    <template id="portal_my_applications_list" name="My Applications List">
-        <t t-call="portal.portal_layout">
-            <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('My Applications', '/my/applications')]"/>
-            
-            <div class="container">
-                <h3 class="mt-4">Lamaran Pekerjaan Anda</h3>
-                
-                <t t-if="not applications">
-                    <div class="alert alert-info">Anda belum pernah mengirimkan lamaran.</div>
-                </t>
-
-                <div t-if="applications" class="list-group mt-4">
-                    <div t-foreach="applications" t-as="app" class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1"><t t-esc="app.job_id.name or 'Tidak ada posisi'"/></h5>
-                            <small class="text-muted">Dilamar pada: <span t-field="app.create_date" t-options='{"format": "dd MMMM yyyy"}'/></small>
-                        </div>
-                        <div>
-                            <t t-if="app.portal_status == 'accepted'">
-                                <span class="badge badge-pill badge-success">Accepted</span>
-                            </t>
-                            <t t-elif="app.portal_status == 'shortlisted'">
-                                <span class="badge badge-pill badge-info">In Process</span>
-                            </t>
-                            <t t-elif="app.portal_status == 'rejected'">
-                                <span class="badge badge-pill badge-danger">Not Retained</span>
-                            </t>
-                            <t t-else="">
-                                <span class="badge badge-pill badge-secondary">Pending</span>
-                            </t>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </t>
-    </template>
 </odoo>
