@@ -7,25 +7,6 @@ from odoo.http import request
 from odoo.addons.portal.controllers.portal import CustomerPortal
 
 class OjtCustomerPortal(CustomerPortal):
-
-    # def _prepare_home_portal_values(self, counters):
-    #     values = super(OjtCustomerPortal, self)._prepare_home_portal_values(counters)
-        
-    #     participant_count = request.env['ojt.participant'].search_count([
-    #         ('partner_id', '=', request.env.user.partner_id.id),
-    #         ('state', 'in', ['active', 'completed'])
-    #     ])
-        
-    #     user_partner = request.env.user.partner_id
-    #     application_count = request.env['hr.applicant'].search_count([
-    #         ('partner_id', '=', user_partner.id)
-    #     ])
-        
-    #     values.update({
-    #         'ojt_count': participant_count,
-    #         'application_count': application_count,
-    #     })
-    #     return values
     
     @http.route(['/ojt/attend/<int:event_link_id>'], type='http', auth="user", website=True)
     def ojt_qr_checkin(self, event_link_id, **kw):

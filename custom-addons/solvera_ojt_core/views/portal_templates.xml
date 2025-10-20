@@ -1,28 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <data>
-        <record id="portal_user_dropdown_inherit_dashboard" model="ir.ui.view">
-            <field name="name">portal.user.dropdown.inherit.dashboard</field>
-            <field name="inherit_id" ref="portal.user_dropdown"/>
-            <field name="arch" type="xml">
-                
-                <xpath expr="//div[@id='o_logout_divider']" position="before">
-                    
-                    <a href="/my" role="menuitem" class="dropdown-item ps-3">
-                        <i class="fa fa-fw fa-id-card-o me-1 small text-primary text-primary-emphasis"/> My Account
-                    </a>
-                    
-                    <a href="/my/dashboard" role="menuitem" class="dropdown-item ps-3">
-                        <i class="fa fa-fw fa-tachometer-alt me-1 small text-primary text-primary-emphasis"/> My Dashboard
-                    </a>
-
-                </xpath>
-
-            </field>
-        </record>
-    </data>
-
     <template id="portal_template_qr_feedback">
         <t t-call="website.layout">
             <div id="wrap">

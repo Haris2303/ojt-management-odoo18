@@ -43,6 +43,7 @@
         'report/report_actions.xml',
         'report/ojt_certificate_report.xml',
         'report/certificate_templates.xml',
+        'views/portal_layout_views.xml',
         'views/portal_templates.xml',
         'views/website_templates.xml',
     ],
