@@ -30,7 +30,7 @@ class OjtAssignmentSubmit(models.Model):
         ('draft', 'Draft'),
         ('submitted', 'Submitted'),
         ('scored', 'Scored')
-    ], string='Status', default='submitted', tracking=True) # Ditambahkan tracking
+    ], string='Status', default='submitted', tracking=True)
 
     access_url = fields.Char('Portal URL', compute='_compute_access_url')
 
@@ -52,7 +52,6 @@ class OjtAssignmentSubmit(models.Model):
     
     def write(self, vals):
         submissions_to_notify = self.browse()
-        # Deteksi jika state diubah menjadi 'scored'
         if vals.get('state') == 'scored':
             submissions_to_notify = self.filtered(lambda s: s.state != 'scored')
 

@@ -2,7 +2,6 @@
 import logging
 from odoo.exceptions import ValidationError
 from odoo import models, fields, api
-from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -13,10 +12,14 @@ class OjtAssignment(models.Model):
 
     name = fields.Char(string='Title', required=True, tracking=True)
 
-    # participant_id = fields.Many2one('ojt.participant', string="Participant", require=False)
-    
     batch_id = fields.Many2one(
-        'ojt.batch', string='OJT Batch', store=True, readonly=False, required=True)
+        'ojt.batch', 
+        string='OJT Batch', 
+        store=True, 
+        readonly=False, 
+        required=True, 
+        domain="[('state', '=', 'ongoing')]"
+    )
     company_id = fields.Many2one(
         'res.company', string='Company',
         related='batch_id.company_id', store=True, readonly=True)
@@ -54,16 +57,12 @@ class OjtAssignment(models.Model):
         return assignments
     
     def write(self, vals):
-        # 1. Identifikasi tugas yang akan di-"Open" SEBELUM state-nya diubah
         assignments_to_notify = self.browse()
         if vals.get('state') == 'open':
-            # Ambil semua record dari 'self' yang state-nya BUKAN 'open' saat ini
             assignments_to_notify = self.filtered(lambda a: a.state != 'open')
 
-        # 2. Lakukan operasi 'write' seperti biasa
         res = super(OjtAssignment, self).write(vals)
 
-        # 3. KIRIM email HANYA untuk tugas yang sudah kita identifikasi tadi
         if assignments_to_notify:
             _logger.info(f"Terdeteksi {len(assignments_to_notify)} tugas yang diubah menjadi 'Open'. Mengirim notifikasi...")
             assignments_to_notify._send_new_assignment_notification()

@@ -31,7 +31,6 @@ class OjtParticipant(models.Model):
         ('failed', 'Failed'), ('left', 'Left')
     ], string='Status', default='active', tracking=True)
 
-    # --- Relational Fields ---
     submission_ids = fields.One2many('ojt.assignment.submit', 'participant_id', string='Assignment Submissions')
     attendance_ids = fields.One2many('ojt.attendance', 'participant_id', string='Attendance Records')
     certificate_ids = fields.One2many('ojt.certificate', 'participant_id', string='Certificates')
@@ -39,19 +38,16 @@ class OjtParticipant(models.Model):
         'slide.channel', 'ojt_participant_channel_rel', 'participant_id', 
         'channel_id', string='eLearning Enrollments')
 
-    # --- Computed KPI Fields ---
     attendance_count = fields.Integer(string="Presents", compute='_compute_attendance_rate', store=True)
     attendance_rate = fields.Float(string="Attendance Rate (%)", compute='_compute_attendance_rate', store=True, group_operator="avg")
     score_avg = fields.Float(string='Average Score', compute='_compute_scores', store=True, digits=(16, 2))
     score_final = fields.Float(string='Final Score', compute='_compute_scores', store=True, digits=(16, 2))
     
-    # --- Smart Button Counter Fields ---
     assignment_submit_count = fields.Integer(compute='_compute_related_counts')
     certificate_count = fields.Integer(compute='_compute_related_counts')
     course_count = fields.Integer(compute='_compute_related_counts')
     survey_count = fields.Integer(compute='_compute_related_counts')
 
-    # --- Manual & Technical Fields ---
     mentor_score = fields.Float(string="Mentor Score", tracking=True, help="Nilai akhir atau evaluasi dari mentor terhadap peserta.")
     portal_token = fields.Char(string='Portal Access Token', index=True, copy=False)
     notes = fields.Text(string='Internal Notes')
@@ -64,22 +60,15 @@ class OjtParticipant(models.Model):
     def _compute_access_url(self):
         super(OjtParticipant, self)._compute_access_url()
         for participant in self:
-            # INI KODE YANG LAMA/SALAH
             participant.access_url = '/my/dashboard'
 
     def write(self, vals):
-        # 1. Identifikasi peserta yang baru saja diberi nilai mentor
         participants_to_notify = self.browse()
-        # Cek jika 'mentor_score' ada di dalam data yang diubah
         if 'mentor_score' in vals and vals.get('mentor_score'):
-            # Ambil semua record dari 'self' yang sebelumnya belum punya nilai mentor
-            # Ini mencegah email terkirim lagi jika mentor hanya mengoreksi nilai.
             participants_to_notify = self.filtered(lambda p: not p.mentor_score)
 
-        # 2. Lakukan operasi 'write' seperti biasa
         res = super(OjtParticipant, self).write(vals)
 
-        # 3. KIRIM email HANYA untuk peserta yang sudah kita identifikasi
         if participants_to_notify:
             _logger.info(f"Terdeteksi {len(participants_to_notify)} peserta yang diberi nilai mentor. Mengirim notifikasi...")
             participants_to_notify._send_mentor_score_notification()
@@ -95,7 +84,6 @@ class OjtParticipant(models.Model):
 
         for participant in self:
             if participant.partner_id.email:
-                # Kita ingin link mengarah ke dashboard utama peserta
                 portal_url = participant.get_portal_url(query_string=f'participant_id={participant.id}')
                 
                 template_ctx = {'url_portal_dashboard': portal_url}
@@ -111,18 +99,14 @@ class OjtParticipant(models.Model):
         """
         for vals in vals_list:
             if 'batch_id' in vals and vals['batch_id']:
-                # Ambil record batch berdasarkan ID yang diberikan
                 batch = self.env['ojt.batch'].browse(vals['batch_id'])
                 
-                # Periksa status batch
                 if batch.state in ['ongoing', 'done', 'cancel']:
-                    # Jika status terkunci, langsung gagalkan proses
                     raise ValidationError(
                         f"You cannot add new participants to the batch '{batch.name}' "
                         f"because its status is '{batch.state}'."
                     )
                     
-        # Jika semua batch valid, lanjutkan proses pembuatan record
         return super(OjtParticipant, self).create(vals_list)
     
     @api.depends('partner_id.name', 'batch_id.name')

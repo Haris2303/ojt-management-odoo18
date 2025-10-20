@@ -77,7 +77,6 @@ class OjtBatch(models.Model):
         if 'state' in vals and vals['state'] == 'ongoing':
             batches_starting = self.filtered(lambda b: b.state != 'ongoing')
 
-        # Reverts 'completed' participants back to 'active' when moved batch from 'done' back to 'draft' or 'recruit'.
         batches_with_new_survey = self.browse()
         if 'survey_id' in vals and vals.get('survey_id'):
             batches_with_new_survey = self.filtered(lambda b: not b.survey_id)
@@ -92,7 +91,6 @@ class OjtBatch(models.Model):
         
         res = super(OjtBatch, self).write(vals)
 
-        # Sends a "Batch Started" notification email
         if batches_starting:
             template = self.env.ref('solvera_ojt_core.mail_template_batch_ongoing', raise_if_not_found=False)
             if template:
@@ -158,8 +156,6 @@ class OjtBatch(models.Model):
 
     def action_done(self):
         self.participant_ids.write({'state': 'completed'})
-
-        # call method send email
         self._send_batch_done_notifications()
 
         return self.write({'state': 'done'})
@@ -220,6 +216,3 @@ class OjtBatch(models.Model):
     def action_view_agenda(self):
         self.ensure_one()
         return self.env['ir.actions.act_window']._for_xml_id('solvera_ojt_core.action_ojt_event_link_from_batch')
-        # action['domain'] = [('batch_id', '=', self.id)]
-        # action['context'] = {'default_batch_id': self.id}
-        # return action

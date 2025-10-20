@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import uuid
 import base64
 import io
 import logging
@@ -17,8 +18,19 @@ class OjtEventLink(models.Model):
     _description = 'OJT Batch to Event Link'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    batch_id = fields.Many2one('ojt.batch', string='OJT Batch', required=True, ondelete='cascade')
-    event_id = fields.Many2one('event.event', string='Event/Session', required=True)
+    batch_id = fields.Many2one(
+        'ojt.batch', 
+        string='OJT Batch', 
+        required=True, 
+        ondelete='cascade',
+        domain="[('state', '=', 'ongoing')]"
+    )
+    event_id = fields.Many2one(
+        'event.event', 
+        string='Event/Session', 
+        required=True, 
+        domain="[('date_begin', '>=', context_today().strftime('%Y-%m-%d'))]"
+    )
     
     is_mandatory = fields.Boolean(
         string='Is Mandatory?', default=True, tracking=True,
@@ -42,6 +54,15 @@ class OjtEventLink(models.Model):
     attendance_count = fields.Integer(compute='_compute_related_counts')
     assignment_count = fields.Integer(compute='_compute_related_counts')
 
+    access_token = fields.Char(
+        'Access Token', 
+        required=True, 
+        readonly=True, 
+        index=True, 
+        copy=False,
+        default=lambda self: str(uuid.uuid4())
+    )
+
     @api.constrains('date_start', 'date_end')
     def _check_dates(self):
         for record in self:
@@ -60,7 +81,7 @@ class OjtEventLink(models.Model):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         for rec in self:
             if qrcode and rec.id:
-                qr_url = f'{base_url}/ojt/attend/{rec.id}'
+                qr_url = f'{base_url}/ojt/attend/{rec.access_token}'
                 img = qrcode.make(qr_url)
                 temp = io.BytesIO()
                 img.save(temp, format="PNG")

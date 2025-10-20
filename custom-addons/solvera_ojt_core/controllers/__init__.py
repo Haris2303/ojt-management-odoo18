@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 from . import portal
-from . import website_hr_recruitment
+from . import website

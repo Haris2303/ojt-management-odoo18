@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_template_qr_feedback">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container py-5">
+                    <div class="alert alert-info text-center" role="alert">
+                        <h4 class="alert-heading">Hasil Check-in</h4>
+                        <p><t t-esc="feedback"/></p>
+                        <hr/>
+                        <a class="btn btn-primary" href="/my/home">Kembali ke Portal</a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

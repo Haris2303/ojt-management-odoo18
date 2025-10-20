@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_participant_batch_selection" name="Select OJT Batch">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('Select Batch', '/my/dashboard')]"/>
+
+            <div class="container ojt-container my-5" style="max-width:880px;">
+                <h2 class="fw-bold text-center mb-3" style="color:#0056b3;">Pilih Batch OJT Anda</h2>
+                <p class="text-muted text-center mb-5">
+                    Anda terdaftar di beberapa program OJT. Pilih batch untuk melihat detailnya.
+                </p>
+
+                <div class="row g-4">
+                    <t t-foreach="participants" t-as="participant">
+                        <div class="col-md-6">
+                            <a t-attf-href="/my/dashboard?participant_id=#{participant.id}" class="text-decoration-none">
+                                <div class="card-hover batch-card d-flex align-items-center p-3" 
+                                    style="background:#fff;border:none;border-radius:12px;transition:all 0.25s ease;">
+                                    <div class="batch-icon me-3" 
+                                        style="width:55px;height:55px;background:linear-gradient(135deg,#007bff,#0056b3);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;">
+                                        <i class="fa fa-users"/>
+                                    </div>
+                                    <div>
+                                        <div class="batch-name fw-semibold mb-1" style="color:#0056b3;">
+                                            <t t-esc="participant.batch_id.name"/>
+                                        </div>
+                                        <div class="status-text text-muted" style="font-size:0.9rem;">
+                                            Status: <t t-esc="participant.state"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="/my/account" class="text-decoration-none" style="color:#0056b3;font-weight:500;">
+                        <i class="fa fa-arrow-left"></i> Kembali ke Akun Saya
+                    </a>
+                </div>
+            </div>
+            <style>
+                .card-hover {
+                    transition: all 0.3s ease;
+                    background-color: #fff;
+                    border: none;
+                    border-radius: 16px;
+                    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+                }
+                .card-hover:hover {
+                    transform: translateY(-6px);
+                    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+                }
+            </style>
+        </t>
+    </template>
+</odoo>

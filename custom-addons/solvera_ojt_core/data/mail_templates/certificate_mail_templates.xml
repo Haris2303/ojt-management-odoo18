@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<!-- Email Certificate -->
+    <record id="mail_template_certificate_issued" model="mail.template">
+        <field name="name">OJT: Certificate Issued Notification</field>
+        <field name="model_id" ref="solvera_ojt_core.model_ojt_certificate"/>
+        <field name="subject">Selamat! Sertifikat OJT Anda Telah Terbit</field>
+        <field name="email_from">"{{ object.participant_id.company_id.email_formatted }}"</field>
+        <field name="email_to">{{ object.participant_id.partner_id.email }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: sans-serif; font-size: 14px; color: #555;">
+                <p>Halo <strong><span t-out="object.participant_id.partner_id.name"/></strong>,</p>
+                <p>
+                    Selamat! Anda telah berhasil menyelesaikan program <strong><span t-out="object.batch_id.name" /></strong> dan sertifikat kelulusan Anda telah diterbitkan.
+                </p>
+                <p>
+                    Anda bisa mengunduh sertifikat Anda melalui portal peserta atau melalui tautan langsung di bawah ini.
+                </p>
+                <div style="margin: 16px 0px 16px 0px;">
+                    <a t-att-href="ctx.get('url_certificate_download')"
+                        style="background-color: #875A7B; padding: 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;">
+                        Unduh Sertifikat Anda
+                    </a>
+                </div>
+                <p>
+                    Kami mengucapkan terima kasih atas partisipasi dan kontribusi Anda selama program berlangsung.
+                </p>
+                <p>Tim OJT</p>
+            </div>
+        </field>
+    </record>
+</odoo>
