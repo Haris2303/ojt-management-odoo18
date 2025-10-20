@@ -1,3 +1,16 @@
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+
+# Odoo config
+odoo.conf
+
+# Docker
+docker-compose.override.yaml
+*.log
+
+# Virtual environment
+venv/
+.env/
