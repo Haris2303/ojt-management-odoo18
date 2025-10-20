@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
+    <!-- Email Portal Invitation -->
     <record id="mail_template_ojt_portal_invitation" model="mail.template">
         <field name="name">OJT: Portal Invitation</field>
         <field name="model_id" ref="solvera_ojt_core.model_ojt_participant"/>
@@ -7,7 +9,7 @@
         <field name="email_from">"{{ object.company_id.name }}" &lt;{{ object.company_id.email or user.email }}&gt;</field>
         <field name="email_to">{{ object.partner_id.email }}</field>
         <field name="body_html" type="html">
-            <div style="margin: 0px; padding: 0px; font-family: 'Lucida Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px;">
+            <div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif; font-size: 14px;">
                 <p>Halo <strong><span t-field="object.partner_id.name"/></strong>,</p>
                 <p>
                     Selamat! Anda telah terdaftar sebagai peserta dalam program On The Job Training (OJT) kami:
@@ -30,12 +32,12 @@
                 <p>
                     Kami sangat antusias menyambut Anda di tim. Jangan ragu untuk menghubungi kami jika ada pertanyaan.
                 </p>
-                <p>Terima kasih,</p>
-                <p>Tim <span t-out="object.company_id.name"/></p>
+                <p>Tim OJT</p>
             </div>
         </field>
     </record>
 
+    <!-- Email new Agenda -->
     <record id="mail_template_new_ojt_agenda" model="mail.template">
         <field name="name">OJT: New Agenda Notification</field>
         <field name="model_id" ref="solvera_ojt_core.model_ojt_event_link"/>
@@ -54,21 +56,24 @@
                     <li><strong>Topik:</strong> <span t-out="object.event_id.name"/></li>
                     <li>
                         <strong>Waktu:</strong>
-                        <span t-out="object.event_id.date_begin"/>
+                        <span t-field="object.date_start" t-options='{"widget": "datetime"}'/>
                     </li>
-                    <li t-if="object.event_id.online_meeting_url">
+
+                    <t t-set="meeting_link" t-value="object.online_meeting_url or object.event_id.meeting_url"/>
+                    <li t-if="meeting_link">
                         <strong>Link Meeting:</strong> 
-                        <a t-att-href="object.event_id.online_meeting_url">Klik di sini untuk bergabung</a>
+                        <a t-att-href="meeting_link">Klik di sini untuk bergabung</a>
                     </li>
                 </ul>
                 <p>
                     Mohon persiapkan diri Anda untuk sesi ini.
                 </p>
-                <p>Terima kasih.</p>
+                <p>Tim OJT</p>
             </div>
         </field>
     </record>
 
+    <!-- Email Certificate -->
     <record id="mail_template_certificate_issued" model="mail.template">
         <field name="name">OJT: Certificate Issued Notification</field>
         <field name="model_id" ref="solvera_ojt_core.model_ojt_certificate"/>
@@ -85,7 +90,7 @@
                     Anda bisa mengunduh sertifikat Anda melalui portal peserta atau melalui tautan langsung di bawah ini.
                 </p>
                 <div style="margin: 16px 0px 16px 0px;">
-                    <a href="/my/home"
+                    <a t-att-href="ctx.get('url_certificate_download')"
                         style="background-color: #875A7B; padding: 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;">
                         Unduh Sertifikat Anda
                     </a>
@@ -93,9 +98,233 @@
                 <p>
                     Kami mengucapkan terima kasih atas partisipasi dan kontribusi Anda selama program berlangsung.
                 </p>
-                <p>Terima kasih</p>
-                <p>Tim, <span t-out="object.participant_id.company_id.name"/> </p>
+                <p>Tim OJT</p>
             </div>
         </field>
+    </record>
+
+    <!-- Email OJT Batch Ongoing -->
+    <record id="mail_template_batch_ongoing" model="mail.template">
+        <field name="name">OJT Batch Started Notification</field>
+        <field name="model_id" ref="solvera_ojt_core.model_ojt_participant"/>
+        <field name="subject">Program OJT Anda Telah Dimulai: {{ object.batch_id.name }}</field>
+        <field name="email_to">{{ object.partner_id.email_formatted }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px;">
+                <p>Halo <span t-out="object.partner_id.name or ''"></span>,</p>
+                
+                <p>Kami ingin memberitahukan bahwa program OJT <strong><span t-field="object.batch_id.name"></span>
+                </strong> tempat Anda terdaftar telah resmi dimulai hari ini!</p>
+                
+                <p>
+                    Anda sekarang dapat mengakses semua materi, tugas, dan jadwal program melalui portal OJT Anda.
+                    Silakan login ke akun Anda untuk melihat detailnya.
+                </p>
+                
+                <div style="margin: 20px 0;">
+                    <a t-att-href="ctx.get('url_portal_batch')"
+                    style="background-color: #875A7B; padding: 10px 20px; color: #fff; text-decoration: none; border-radius: 5px;">
+                        Buka Dashboard OJT
+                    </a>
+                </div>
+
+                <p>Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi mentor atau admin program.</p>
+                
+                <p>Semoga sukses!</p>
+                <br/>
+                <p>Tim OJT</p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <record id="mail_template_batch_done" model="mail.template">
+        <field name="name">OJT Batch Finished Notification</field>
+        <field name="model_id" ref="solvera_ojt_core.model_ojt_participant"/>
+        <field name="subject">Selamat! Anda Telah Menyelesaikan Program OJT: {{ object.batch_id.name }}</field>
+        <field name="email_to">{{ object.partner_id.email_formatted }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px;">
+                <p>Halo <span t-out="object.partner_id.name or ''"></span>,</p>
+                
+                <p>
+                    Selamat! Kami ingin memberitahukan bahwa Anda telah berhasil menyelesaikan program OJT
+                    <strong><span t-field="object.batch_id.name"></span></strong>.
+                </p>
+                
+                <p>
+                    Kami mengucapkan terima kasih atas partisipasi, kerja keras, dan kontribusi Anda selama program berlangsung.
+                    Anda dapat melihat rekap nilai akhir dan mengunduh sertifikat (jika tersedia) melalui portal OJT Anda.
+                </p>
+                
+                <div style="margin: 20px 0;">
+                    <a t-att-href="ctx.get('url_portal_batch')"
+                        style="background-color: #875A7B; padding: 10px 20px; color: #fff; text-decoration: none; border-radius: 5px;">
+                        Lihat Hasil Akhir di Portal
+                    </a>
+                </div>
+
+                <p>Semoga ilmu dan pengalaman yang Anda dapatkan bermanfaat untuk karir Anda ke depannya.</p>
+                
+                <p>Sukses selalu!</p>
+                <br/>
+                <p>Tim OJT</p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <record id="mail_template_new_assignment" model="mail.template">
+        <field name="name">OJT New Assignment Notification</field>
+        <field name="model_id" ref="solvera_ojt_core.model_ojt_assignment"/>
+        <field name="subject">Tugas Baru: {{ object.name }} - {{ object.batch_id.name }}</field>
+        <field name="email_to">{{ user.email }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px;">
+                <p>Halo <span t-out="ctx.get('participant_name') or ''"></span>,</p>
+                
+                <p>
+                    Anda mendapatkan tugas baru dalam program OJT <strong><span t-field="object.batch_id.name"></span></strong>.
+                </p>
+                <p>
+                    <strong>Judul Tugas:</strong> <span t-field="object.name"/><br/>
+                    <strong>Tenggat Waktu:</strong> <span t-field="object.deadline" t-options='{"widget": "datetime"}'/>
+                </p>
+                
+                <p>
+                    Silakan lihat detail lengkap dan instruksi pengerjaan tugas melalui portal OJT Anda.
+                </p>
+                
+                <div style="margin: 20px 0;">
+                    <a t-att-href="ctx.get('url_portal_assignment')"
+                        style="background-color: #875A7B; padding: 10px 20px; color: #fff; text-decoration: none; border-radius: 5px;">
+                        Lihat Detail Tugas
+                    </a>
+                </div>
+
+                <p>Mohon selesaikan tugas sebelum tenggat waktu yang ditentukan.</p>
+                
+                <p>Terima kasih,</p>
+                <p>Tim OJT</p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <record id="mail_template_assignment_scored" model="mail.template">
+        <field name="name">OJT: Assignment Scored Notification</field>
+        <field name="model_id" ref="solvera_ojt_core.model_ojt_assignment_submit"/>
+        <field name="subject">Tugas Anda Telah Dinilai: {{ object.assignment_id.name }}</field>
+        <field name="email_to">{{ object.participant_id.partner_id.email_formatted }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px;">
+                <p>Halo <span t-out="object.participant_id.partner_id.name or ''"></span>,</p>
+                
+                <p>
+                    Tugas Anda untuk <strong><span t-field="object.assignment_id.name"></span></strong> telah dinilai.
+                </p>
+                
+                <div style="margin: 16px 0; padding: 10px; border-left: 3px solid #875A7B; background-color: #f9f9f9;">
+                    <strong>Nilai Anda:</strong>
+                    <h2 style="margin: 0;"><span t-field="object.score"/> / <span t-field="object.assignment_id.max_score"/></h2>
+                    <br/>
+                    <strong>Feedback dari Mentor:</strong>
+                    <div t-field="object.feedback"/>
+                </div>
+                
+                <p>
+                    Anda dapat melihat detail lengkapnya melalui portal OJT.
+                </p>
+                
+                <div style="margin: 20px 0;">
+                    <a t-att-href="ctx.get('url_portal_submission')"
+                        style="background-color: #875A7B; padding: 10px 20px; color: #fff; text-decoration: none; border-radius: 5px;">
+                        Lihat Detail Pengumpulan Tugas
+                    </a>
+                </div>
+
+                <p>Terus tingkatkan performa Anda!</p>
+                
+                <p>Terima kasih,</p>
+                <p>Tim OJT</p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <record id="mail_template_mentor_score" model="mail.template">
+        <field name="name">OJT: Mentor Evaluation Score Notification</field>
+        <field name="model_id" ref="solvera_ojt_core.model_ojt_participant"/>
+        <field name="subject">Evaluasi Akhir dari Mentor Telah Diberikan - {{ object.batch_id.name }}</field>
+        <field name="email_to">{{ object.partner_id.email_formatted }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px;">
+                <p>Halo <span t-out="object.partner_id.name or ''"></span>,</p>
+                
+                <p>
+                    Evaluasi akhir dari mentor untuk partisipasi Anda dalam program OJT 
+                    <strong><span t-field="object.batch_id.name"></span></strong> telah diberikan.
+                </p>
+                
+                <div style="margin: 16px 0; padding: 10px; border-left: 3px solid #875A7B; background-color: #f9f9f9;">
+                    <strong>Nilai Evaluasi dari Mentor:</strong>
+                    <h2 style="margin: 0;"><span t-field="object.mentor_score"/> / 100</h2>
+                </div>
+                
+                <p>
+                    Nilai ini akan menjadi salah satu komponen dalam nilai akhir OJT Anda. Anda dapat melihat rekapitulasi nilai Anda secara keseluruhan melalui portal OJT.
+                </p>
+                
+                <div style="margin: 20px 0;">
+                    <a t-att-href="ctx.get('url_portal_dashboard')"
+                        style="background-color: #875A7B; padding: 10px 20px; color: #fff; text-decoration: none; border-radius: 5px;">
+                        Buka Dashboard OJT
+                    </a>
+                </div>
+
+                <p>Terima kasih atas partisipasi aktif Anda.</p>
+                
+                <p>Hormat kami,</p>
+                <p>Tim OJT</p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <record id="mail_template_batch_survey" model="mail.template">
+        <field name="name">OJT: Survey Invitation</field>
+        <field name="model_id" ref="solvera_ojt_core.model_ojt_participant"/>
+        <field name="subject">Undangan Mengisi Survei Evaluasi: {{ object.batch_id.name }}</field>
+        <field name="email_to">{{ object.partner_id.email_formatted }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px;">
+                <p>Halo <span t-out="object.partner_id.name or ''"></span>,</p>
+                
+                <p>
+                    Sebagai bagian dari evaluasi program OJT <strong><span t-field="object.batch_id.name"></span></strong>, kami mohon kesediaan Anda untuk mengisi survei berikut:
+                </p>
+                
+                <p style="font-size: 14px; font-weight: bold;">
+                    "<span t-field="object.batch_id.survey_id.title"/>"
+                </p>
+                
+                <p>
+                    Masukan Anda sangat berharga bagi kami untuk perbaikan program di masa mendatang.
+                </p>
+                
+                <div style="margin: 20px 0;">
+                    <a t-att-href="ctx.get('url_survey')"
+                        style="background-color: #875A7B; padding: 10px 20px; color: #fff; text-decoration: none; border-radius: 5px;">
+                        Mulai Isi Survei
+                    </a>
+                </div>
+
+                <p>Terima kasih atas waktu dan partisipasi Anda.</p>
+                
+                <p>Hormat kami,</p>
+                <p>Tim OJT</p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="True"/>
     </record>
 </odoo>

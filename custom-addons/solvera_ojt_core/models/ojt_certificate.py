@@ -13,7 +13,7 @@ from odoo import models, fields, api
 class OjtCertificate(models.Model):
     _name = 'ojt.certificate'
     _description = 'OJT Digital Certificate'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'portal.mixin']
 
     name = fields.Char(
         string='Certificate Title', required=True, tracking=True,
@@ -33,7 +33,7 @@ class OjtCertificate(models.Model):
         string='Verification Token', required=True, index=True, copy=False,
         default=lambda self: str(uuid.uuid4()))
     
-    issued_on = fields.Date(string='Issued On', readonly=True, copy=False)
+    issued_date = fields.Date(string='Issue Date', readonly=True, copy=False)
     
     attendance_rate = fields.Float(string='Attendance Rate (%)', readonly=True)
     final_score = fields.Float(string='Final Score', readonly=True)
@@ -50,6 +50,8 @@ class OjtCertificate(models.Model):
     
     notes = fields.Text(string='Internal Notes')
     qr_code_image = fields.Binary("Verification QR Code", compute='_compute_qr_code')
+
+    access_url = fields.Char('Portal URL', compute='_compute_access_url')
 
     _sql_constraints = [
         ('serial_uniq', 'unique(serial)', 'The Serial Number must be unique!'),
@@ -83,7 +85,7 @@ class OjtCertificate(models.Model):
     def action_issue(self):
         return self.write({
             'state': 'issued',
-            'issued_on': fields.Date.context_today(self),
+            'issued_date': fields.Date.context_today(self),
         })
 
     @api.depends('qr_token')
@@ -98,3 +100,8 @@ class OjtCertificate(models.Model):
                 rec.qr_code_image = base64.b64encode(temp.getvalue())
             else:
                 rec.qr_code_image = False
+
+    def _compute_access_url(self):
+        super(OjtCertificate, self)._compute_access_url()
+        for certificate in self:
+            certificate.access_url = f'/my/certificate/download/{certificate.id}'

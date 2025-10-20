@@ -19,220 +19,255 @@
     <template id="portal_participant_dashboard" name="OJT Participant Dashboard">
         <t t-call="portal.portal_layout">
             <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('Dashboard', '/my/dashboard')]"/>
-            
-            <div class="container">
-                <h2 class="mt-4">Selamat Datang, <t t-esc="participant.partner_id.name"/>!</h2>
-                <p class="lead">Ini adalah ringkasan progres OJT Anda di batch: <strong><t t-esc="participant.batch_id.name"/></strong></p>
 
-                <hr/>
+            <div class="container py-5">
+                
+                <!-- Header -->
+                <div class="text-center text-white mb-5 p-5 rounded-4 shadow-sm"
+                    style="background:linear-gradient(135deg,#007bff,#00b4d8);">
+                    <h2>Selamat Datang, <strong><t t-esc="participant.partner_id.name"/></strong> 👋</h2>
+                    <p class="lead">Batch: <strong><t t-esc="participant.batch_id.name"/></strong></p>
+                </div>
 
-                <h3>Ringkasan Progres</h3>
-                <div class="row mt-4">
+                <!-- Progress Summary -->
+                <h4 class="border-start border-4 border-primary ps-2 fw-semibold mb-4">Ringkasan Progres</h4>
+                <div class="row text-center g-4 mb-5">
                     <div class="col-md-4">
-                        <div class="card text-center p-3">
-                            <div class="card-body">
-                                <h4 class="card-title">Nilai Akhir</h4>
-                                <p class="card-text display-4"><t t-esc="'%.2f' % participant.score_final"/></p>
-                            </div>
+                        <div class="card p-4 shadow-sm rounded-4">
+                            <h6 class="text-muted">Nilai Akhir</h6>
+                            <h2 class="text-primary fw-bold"><t t-esc="'%.2f' % participant.score_final"/></h2>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card text-center p-3">
-                            <div class="card-body">
-                                <h4 class="card-title">Tingkat Kehadiran</h4>
-                                <p class="card-text display-4"><t t-esc="'%.1f' % participant.attendance_rate"/>%</p>
-                            </div>
+                        <div class="card p-4 shadow-sm rounded-4">
+                            <h6 class="text-muted">Tingkat Kehadiran</h6>
+                            <h2 class="text-success fw-bold"><t t-esc="'%.1f' % participant.attendance_rate"/>%</h2>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card text-center p-3">
-                            <div class="card-body">
-                                <h4 class="card-title">Tugas Selesai</h4>
-                                <p class="card-text display-4">
-                                    <t t-esc="progress_data['assignment_completed_count']"/> / <t t-esc="progress_data['assignment_total_count']"/>
-                                </p>
-                            </div>
+                        <div class="card p-4 shadow-sm rounded-4">
+                            <h6 class="text-muted">Tugas Selesai</h6>
+                            <h2 class="text-warning fw-bold">
+                                <t t-esc="progress_data['assignment_completed_count']"/> /
+                                <t t-esc="progress_data['assignment_total_count']"/>
+                            </h2>
                         </div>
                     </div>
                 </div>
 
-                <hr class="mt-5"/>
-                
                 <div class="row">
+                    <!-- Assignments -->
                     <div class="col-lg-7">
-                        <h3>Daftar Tugas</h3>
-                        <div class="list-group mt-3">
+                        <h4 class="border-start border-4 border-primary ps-2 fw-semibold mb-3">Daftar Tugas</h4>
+                        <div class="list-group">
                             <t t-if="not assignments">
-                                <a href="#" class="list-group-item">Belum ada tugas.</a>
+                                <div class="list-group-item">Belum ada tugas.</div>
                             </t>
                             <t t-foreach="assignments" t-as="assignment">
-                                <a t-attf-href="/my/assignment/#{assignment.id}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <a t-attf-href="/my/assignment/#{assignment.id}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center rounded-3 mb-2">
                                     <div>
                                         <h6 class="mb-1"><t t-esc="assignment.name"/></h6>
-                                        <small class="text-muted">Deadline: <span t-field="assignment.deadline" t-options='{"format": "dd MMM yyyy"}'/></small>
+                                        <small class="text-muted"><i class="fa fa-calendar me-1"/>Deadline:
+                                            <span t-field="assignment.deadline" t-options='{"format": "dd MMM yyyy"}'/>
+                                        </small>
                                     </div>
                                     <t t-set="submission" t-value="assignment.submit_ids.filtered(lambda s: s.participant_id.id == participant.id)"/>
                                     <t t-if="submission">
-                                        <span class="badge badge-success badge-pill">Submitted</span>
+                                        <span class="badge bg-success rounded-pill">Submitted</span>
                                     </t>
                                     <t t-else="">
-                                        <span class="badge badge-warning badge-pill">Pending</span>
+                                        <span class="badge bg-warning text-dark rounded-pill">Pending</span>
                                     </t>
                                 </a>
                             </t>
                         </div>
                     </div>
 
+                    <!-- Agenda -->
                     <div class="col-lg-5">
-                        <h3>Agenda Terdekat</h3>
-                        <ul class="list-group mt-3">
+                        <h4 class="border-start border-4 border-primary ps-2 fw-semibold mb-3">Agenda Terdekat</h4>
+                        <ul class="list-group">
                             <t t-if="not agenda_items">
                                 <li class="list-group-item">Belum ada agenda.</li>
                             </t>
                             <t t-foreach="agenda_items" t-as="agenda">
-                                <a t-attf-href="/my/agenda/#{agenda.id}" class="list-group-item list-group-item-action">
+                                <a t-attf-href="/my/agenda/#{agenda.id}" class="list-group-item list-group-item-action rounded-3 mb-2">
                                     <strong><t t-esc="agenda.event_id.name"/></strong><br/>
-                                    <small class="text-muted"><span t-field="agenda.event_id.date_begin" t-options='{"format": "dd MMM yyyy, HH:mm"}'/></small>
+                                    <small class="text-muted"><i class="fa fa-clock me-1"/><span t-field="agenda.event_id.date_begin" t-options='{"format": "dd MMM yyyy, HH:mm"}'/></small>
                                 </a>
                             </t>
                         </ul>
                     </div>
                 </div>
 
-                <hr class="mt-5"/>
-                <h3>Survei &amp; Evaluasi</h3>
-                <div class="list-group mt-3">
-                    <t t-if="not surveys">
-                        <div class="list-group-item">Belum ada survei yang tersedia.</div>
-                    </t>
-                    <t t-foreach="survey_data" t-as="s_data">
-                        <div t-if="s_data['is_done']" class="list-group-item d-flex justify-content-between align-items-center bg-light">
-                            <div>
-                                <h6 class="mb-1 text-muted"><t t-esc="s_data['survey'].title"/></h6>
-                                <small class="text-muted">Anda sudah menyelesaikan survei ini.</small>
+                <!-- Surveys -->
+                <div class="mt-5">
+                    <h4 class="border-start border-4 border-primary ps-2 fw-semibold mb-3">Survei &amp; Evaluasi</h4>
+                    <div class="list-group">
+                        <t t-if="not surveys">
+                            <div class="list-group-item">Belum ada survei yang tersedia.</div>
+                        </t>
+                        <t t-foreach="survey_data" t-as="s_data">
+                            <div t-if="s_data['is_done']" class="list-group-item d-flex justify-content-between align-items-center bg-light rounded-3 mb-2">
+                                <div>
+                                    <h6 class="mb-1 text-muted"><t t-esc="s_data['survey'].title"/></h6>
+                                    <small class="text-muted">Anda sudah menyelesaikan survei ini.</small>
+                                </div>
+                                <span class="badge bg-success rounded-pill"><i class="fa fa-check"/> Selesai</span>
                             </div>
-                            <span class="badge badge-success badge-pill"><i class="fa fa-check"/> Selesai</span>
-                        </div>
+                            <a t-else="" t-att-href="s_data['survey'].get_start_url()" target="_blank"
+                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center rounded-3 mb-2">
+                                <div>
+                                    <h6 class="mb-1"><t t-esc="s_data['survey'].title"/></h6>
+                                    <small class="text-muted">Klik untuk memulai</small>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">Mulai Survei</span>
+                            </a>
+                        </t>
+                    </div>
+                </div>
 
-                        <a t-else="" t-att-href="s_data['survey'].get_start_url()" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" target="_blank">
-                            <div>
-                                <h6 class="mb-1"><t t-esc="s_data['survey'].title"/></h6>
-                                <small class="text-muted">Klik untuk memulai</small>
+                <!-- Certificate -->
+                <div class="mt-5">
+                    <h4 class="border-start border-4 border-primary ps-2 fw-semibold mb-3">Sertifikat</h4>
+                    <div class="list-group">
+                        <div class="card mb-3 border-0 shadow-sm rounded-3 certificate-card">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">Program: <strong><t t-esc="participant.batch_id.name"/></strong></h5>
+                                    <small class="text-muted">
+                                        Status: 
+                                        <t t-if="certificate_data and certificate_data.state == 'issued'">
+                                            <span class="badge bg-success certificate-badge">Telah Terbit</span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="badge bg-secondary certificate-badge">Belum Tersedia</span>
+                                        </t>
+                                    </small>
+                                </div>
+                                <div>
+                                    <t t-if="certificate_data and certificate_data.state == 'issued'">
+                                        <a t-attf-href="/my/certificate/download/#{certificate_data.id}" class="btn btn-primary btn-sm">
+                                            <i class="fa fa-download"></i> Unduh Sertifikat
+                                        </a>
+                                    </t>
+                                    <t t-else="">
+                                        <button class="btn btn-outline-secondary btn-sm" disabled="disabled">
+                                            <i class="fa fa-clock"></i> Menunggu Terbit
+                                        </button>
+                                    </t>
+                                </div>
                             </div>
-                            <span class="badge badge-primary badge-pill">Mulai Survei</span>
-                        </a>
-                    </t>
+                        </div>
+                    </div>
                 </div>
             </div>
         </t>
     </template>
 
-    <template id="portal_my_home_add_ojt_dashboard_link" inherit_id="portal.portal_my_home" name="Portal My Home: OJT Dashboard">
-        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
-            <t t-if="ojt_count">
-                <div class="o_portal_category row g-2 mt-3">
-                    <div class="o_portal_index_card col-md-6 order-2">
-                        <a class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none bg-100" href="/my/dashboard" title="OJT Dashboard">
-                            <i class="fa fa-tachometer fa-3x text-primary me-3" aria-hidden="true"/>
-                            <div>
-                                <h5 class="card-title mb-0">OJT Dashboard</h5>
-                                <p class="card-text text-muted small">Lihat progres, tugas, dan jadwal Anda.</p>
-                            </div>
-                        </a>
-                    </div>
-                
-                    <div class="o_portal_index_card col-md-6 order-2">
-                        <a class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none bg-100" href="/my/certificates" title="My Certificates">
-                            <i class="fa fa-certificate fa-3x text-success me-3" aria-hidden="true"></i>
-                            <div>
-                                <h5 class="card-title mb-0">Sertifikat Saya</h5>
-                                <p class="card-text text-muted small">Lihat dan unduh sertifikat OJT Anda.</p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </t>
-
-            <t t-if="application_count">
-                <div class="o_portal_index_card row g-2 mt-3">
-                    <div class="col-md-6 order-2">
-                        <a class="d-flex gap-2 gap-md-3 py-3 pe-2 px-md-3 h-100 rounded text-decoration-none bg-100" 
-                            href="/my/applications" title="My Applications">
-                            <i class="fa fa-file-text-o fa-3x text-info me-3" aria-hidden="true"></i>
-                            <div>
-                                <h5 class="card-title mb-0">My Applications</h5>
-                                <p class="card-text text-muted small">
-                                    <span class="badge badge-pill badge-info"><t t-esc="application_count"/></span>
-                                    Lacak status lamaran pekerjaan Anda.
-                                </p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </t>
-
-        </xpath>
-    </template>
-
     <template id="portal_participant_batch_selection" name="Select OJT Batch">
         <t t-call="portal.portal_layout">
             <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('Select Batch', '/my/dashboard')]"/>
-            
-            <div class="container">
-                <h3 class="mt-4">Pilih Batch OJT</h3>
-                <p>Anda terdaftar di beberapa program OJT. Silakan pilih batch mana yang ingin Anda lihat detailnya.</p>
-                
-                <div class="list-group mt-4">
-                    <a t-foreach="participants" t-as="participant"
-                        t-attf-href="/my/dashboard?participant_id=#{participant.id}"
-                        class="list-group-item list-group-item-action">
-                        <h5 class="mb-1"><t t-esc="participant.batch_id.name"/></h5>
-                        <small>Status: <t t-esc="participant.state"/></small>
+
+            <div class="container ojt-container my-5" style="max-width:880px;">
+                <h2 class="fw-bold text-center mb-3" style="color:#0056b3;">Pilih Batch OJT Anda</h2>
+                <p class="text-muted text-center mb-5">
+                    Anda terdaftar di beberapa program OJT. Pilih batch untuk melihat detailnya.
+                </p>
+
+                <div class="row g-4">
+                    <t t-foreach="participants" t-as="participant">
+                        <div class="col-md-6">
+                            <a t-attf-href="/my/dashboard?participant_id=#{participant.id}" class="text-decoration-none">
+                                <div class="card-hover batch-card d-flex align-items-center p-3" 
+                                    style="background:#fff;border:none;border-radius:12px;transition:all 0.25s ease;">
+                                    <div class="batch-icon me-3" 
+                                        style="width:55px;height:55px;background:linear-gradient(135deg,#007bff,#0056b3);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;">
+                                        <i class="fa fa-users"/>
+                                    </div>
+                                    <div>
+                                        <div class="batch-name fw-semibold mb-1" style="color:#0056b3;">
+                                            <t t-esc="participant.batch_id.name"/>
+                                        </div>
+                                        <div class="status-text text-muted" style="font-size:0.9rem;">
+                                            Status: <t t-esc="participant.state"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="/my/account" class="text-decoration-none" style="color:#0056b3;font-weight:500;">
+                        <i class="fa fa-arrow-left"></i> Kembali ke Akun Saya
                     </a>
                 </div>
             </div>
+            <style>
+                .card-hover {
+                    transition: all 0.3s ease;
+                    background-color: #fff;
+                    border: none;
+                    border-radius: 16px;
+                    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+                }
+                .card-hover:hover {
+                    transform: translateY(-6px);
+                    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+                }
+            </style>
         </t>
     </template>
 
     <template id="portal_ojt_agenda_detail" name="OJT Agenda Detail">
         <t t-call="portal.portal_layout">
             <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('Dashboard', '/my/dashboard'), (event.name, '#')]"/>
-            
-            <div class="container py-4">
-                <div t-if="event.online_meeting_url" class="mb-4 text-center">
-                    <a t-att-href="event.online_meeting_url" class="btn btn-primary btn-lg" target="_blank">
-                        <i class="fa fa-video-camera" aria-hidden="true"/> Join Online Meeting
+
+            <t t-set="meeting_link" t-value="event_link.online_meeting_url or event.meeting_url"/>
+
+            <div class="container py-5">
+                
+                <div t-if="meeting_link" class="text-center mb-4">
+                    <a t-att-href="meeting_link" target="_blank" 
+                    class="btn text-white px-4 py-2"
+                    style="background:linear-gradient(135deg,#007bff,#0056b3);border-radius:50px;box-shadow:0 3px 6px rgba(0,0,0,0.1);">
+                        <i class="fa fa-video-camera me-2"/> Join Online Meeting
                     </a>
                 </div>
 
-                <div class="pb-2 mb-3 border-bottom">
-                    <h1><t t-esc="event.name"/></h1>
-                    <p class="lead text-muted">
-                        <i class="fa fa-calendar" aria-hidden="true"/> 
-                        <t t-esc="event.date_begin.strftime('%d %B %Y')"/>,
-                        <t t-esc="event.date_begin.strftime('%H:%M')"/> - 
-                        <t t-esc="event.date_end.strftime('%H:%M')"/>
-                    </p>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-8">
-                        <h4>Deskripsi Sesi</h4>
-                        <div t-field="event.note" class="text-muted"/>
+                <div class="p-4 bg-white rounded-4 shadow-sm">
+                    <div class="pb-3 mb-3 border-bottom">
+                        <h1 class="fw-semibold"><t t-esc="event.name"/></h1>
+                        <p class="text-muted">
+                            <i class="fa fa-calendar me-1"/> 
+                            <t t-esc="event.date_begin.strftime('%d %B %Y')"/>,
+                            <t t-esc="event.date_begin.strftime('%H:%M')"/> - 
+                            <t t-esc="event.date_end.strftime('%H:%M')"/>
+                        </p>
                     </div>
-                    <div class="col-lg-4">
-                        <h4>Detail</h4>
-                        <ul class="list-group">
-                            <li t-if="event.address_id" class="list-group-item">
-                                <strong>Lokasi:</strong><br/>
-                                <address t-field="event.address_id" t-options='{"widget": "contact", "fields": ["address", "name"]}'/>
-                            </li>
-                            <li class="list-group-item">
-                                <strong>Wajib Hadir:</strong>
-                                <span t-if="event_link.is_mandatory" class="badge badge-success">Ya</span>
-                                <span t-else="" class="badge badge-secondary">Tidak</span>
-                            </li>
-                        </ul>
+
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <h4 class="mb-3">Deskripsi Sesi</h4>
+                            <div t-field="event.note" class="text-muted"/>
+                        </div>
+                        <div class="col-lg-4">
+                            <h4 class="mb-3">Detail</h4>
+                            <ul class="list-group">
+                                <li t-if="event.address_id" class="list-group-item bg-light rounded mb-2 border-0">
+                                    <strong>Lokasi:</strong><br/>
+                                    <address t-field="event.address_id" 
+                                            t-options='{"widget": "contact", "fields": ["address", "name"]}'/>
+                                </li>
+                                <li class="list-group-item bg-light rounded border-0">
+                                    <strong>Wajib Hadir:</strong>
+                                    <span t-if="event_link.is_mandatory" class="badge bg-success">Ya</span>
+                                    <span t-else="" class="badge bg-secondary">Tidak</span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -243,156 +278,96 @@
         <t t-call="portal.portal_layout">
             <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('Dashboard', '/my/dashboard'), (assignment.name, '#')]"/>
             
-            <div class="container py-4">
-                <div class="pb-2 mb-3 border-bottom">
-                    <h1><t t-esc="assignment.name"/></h1>
-                    <p class="lead text-muted">
-                        Batas Waktu: 
-                        <strong t-att-class="'text-danger' if is_overdue else ''">
+            <div class="container py-5">
+                <div class="assignment-header mb-4 p-4 rounded text-white" style="background:linear-gradient(135deg,#007bff,#00b4d8); box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+                    <h1 class="mb-2"><t t-esc="assignment.name"/></h1>
+                    <p class="deadline mb-0">
+                        <i class="fa fa-calendar"></i> Batas Waktu: 
+                        <strong t-att-class="'text-warning' if not is_overdue else 'text-danger'">
                             <t t-if="assignment.deadline" t-esc="assignment.deadline.strftime('%d %B %Y, %H:%M')"/>
                         </strong>
                     </p>
                 </div>
-                
-                <h4>Deskripsi</h4>
-                <div t-field="assignment.description" class="mb-5"/>
 
-                <hr/>
+                <div class="mb-4">
+                    <h4 class="mb-2"><i class="fa fa-file-alt"></i> Deskripsi</h4>
+                    <div t-field="assignment.description" class="text-muted"/>
+                </div>
 
                 <t t-if="submission">
-                    <div class="card bg-light">
-                        <div class="card-header">
-                            <h4 class="mb-0">Jawaban Anda</h4>
+                    <div class="card card-custom mb-4 border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fa fa-paper-plane"></i> Jawaban Anda</h5>
                         </div>
                         <div class="card-body">
                             <p>
-                                Anda telah mengirimkan tugas ini pada: 
-                                <strong><span t-field="submission.submitted_on" t-esc="submission.submitted_on.strftime('%d %B %Y, %H:%M')"/></strong>
-                                <span t-if="submission.late" class="badge badge-danger ml-2">TERLAMBAT</span>
+                                Anda telah mengirimkan tugas ini pada:
+                                <strong><t t-esc="submission.submitted_on.strftime('%d %B %Y, %H:%M')"/></strong>
+                                <span t-if="submission.late" class="badge bg-danger ms-2">TERLAMBAT</span>
                             </p>
-                            
-                            <div t-if="submission.url_link">
-                                <strong>Link URL:</strong> <a t-att-href="submission.url_link" target="_blank"><t t-esc="submission.url_link"/></a>
+
+                            <div t-if="submission.url_link" class="mb-3">
+                                <strong>Link URL:</strong> 
+                                <a t-att-href="submission.url_link" target="_blank" class="text-decoration-none text-primary">
+                                    <t t-esc="submission.url_link"/>
+                                </a>
                             </div>
-                            
-                            <div t-if="attachment_data" class="mt-3">
+
+                            <div t-if="attachment_data" class="mb-3">
                                 <strong>Lampiran:</strong>
-                                <ul class="list-unstyled">
+                                <ul class="list-unstyled mt-2">
                                     <li t-foreach="attachment_data" t-as="att">
-                                        <a t-att-href="att['url']"><i class="fa fa-download"/> <t t-esc="att['name']"/></a>
+                                        <a t-att-href="att['url']" class="text-decoration-none">
+                                            <i class="fa fa-download"></i> <t t-esc="att['name']"/>
+                                        </a>
                                     </li>
                                 </ul>
                             </div>
 
                             <hr/>
-                            <h4>Feedback &amp; Penilaian</h4>
-                            <div t-if="submission.state == 'scored'">
+                            <h5 class="mb-3"><i class="fa fa-comment-dots"></i> Feedback &amp; Penilaian</h5>
+                            <t t-if="submission.state == 'scored'">
                                 <h5>Skor: <span class="text-primary"><t t-esc="submission.score"/></span> / <t t-esc="assignment.max_score"/></h5>
                                 <div t-field="submission.feedback"/>
-                            </div>
-                            <div t-else="">
-                                <p class="text-muted">Tugas Anda sedang menunggu penilaian dari mentor.</p>
-                            </div>
-                        </div>
-                    </div>
-                </t>
-                <t t-else="">
-                    <form action="/my/assignment/submit" method="post" enctype="multipart/form-data">
-                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                        <input type="hidden" name="assignment_id" t-att-value="assignment.id"/>
-                        
-                        <h4>Form Pengumpulan Tugas</h4>
-                        
-                        <div class="form-group">
-                            <label for="url_link">Link URL (opsional)</label>
-                            <input type="text" class="form-control" name="url_link" placeholder="https://github.com/... atau https://figma.com/..."/>
-                            <small class="form-text text-muted">Isi jika jawaban Anda berupa link (misal: Github, Figma, Google Drive, dll).</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="attachments">Unggah File</label>
-                            <input type="file" class="form-control-file" name="attachments" multiple="multiple"/>
-                            <small class="form-text text-muted">Anda bisa memilih lebih dari satu file.</small>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary mt-3">Kumpulkan Tugas</button>
-                    </form>
-                </t>
-            </div>
-        </t>
-    </template>
-
-    <template id="portal_my_certificates" name="My Certificates">
-        <t t-call="portal.portal_layout">
-            <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('My Certificates', '/my/certificates')]"/>
-            
-            <div class="container">
-                <h3 class="mt-4">Sertifikat OJT Anda</h3>
-                
-                <t t-if="not participants">
-                    <div class="alert alert-info">Anda belum terdaftar di program OJT manapun.</div>
-                </t>
-
-                <div t-if="participants" class="list-group mt-4">
-                    <div t-foreach="participants" t-as="participant" class="list-group-item d-flex justify-content-between align-items-center">
-                        
-                        <t t-set="certificate" t-value="participant.certificate_ids[:1]"/>
-
-                        <div>
-                            <h5 class="mb-1">Program: <t t-esc="participant.batch_id.name"/></h5>
-                            <small class="text-muted">Status: 
-                                <span t-if="certificate and certificate.state == 'issued'" class="badge badge-success">Telah Terbit</span>
-                                <span t-else="" class="badge badge-secondary">Belum Tersedia</span>
-                            </small>
-                        </div>
-                        <div>
-                            <a t-if="certificate and certificate.state == 'issued'"
-                                t-attf-href="/my/certificate/download/#{certificate.id}"
-                                class="btn btn-primary btn-sm">
-                                    <i class="fa fa-download"/> Unduh Sertifikat
-                            </a>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </t>
-    </template>
-
-    <template id="portal_my_applications_list" name="My Applications List">
-        <t t-call="portal.portal_layout">
-            <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('My Applications', '/my/applications')]"/>
-            
-            <div class="container">
-                <h3 class="mt-4">Lamaran Pekerjaan Anda</h3>
-                
-                <t t-if="not applications">
-                    <div class="alert alert-info">Anda belum pernah mengirimkan lamaran.</div>
-                </t>
-
-                <div t-if="applications" class="list-group mt-4">
-                    <div t-foreach="applications" t-as="app" class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1"><t t-esc="app.job_id.name or 'Tidak ada posisi'"/></h5>
-                            <small class="text-muted">Dilamar pada: <span t-field="app.create_date" t-options='{"format": "dd MMMM yyyy"}'/></small>
-                        </div>
-                        <div>
-                            <t t-if="app.portal_status == 'accepted'">
-                                <span class="badge badge-pill badge-success">Accepted</span>
-                            </t>
-                            <t t-elif="app.portal_status == 'shortlisted'">
-                                <span class="badge badge-pill badge-info">In Process</span>
-                            </t>
-                            <t t-elif="app.portal_status == 'rejected'">
-                                <span class="badge badge-pill badge-danger">Not Retained</span>
                             </t>
                             <t t-else="">
-                                <span class="badge badge-pill badge-secondary">Pending</span>
+                                <p class="text-muted">Tugas Anda sedang menunggu penilaian dari mentor.</p>
                             </t>
                         </div>
                     </div>
-                </div>
+                </t>
+
+                <t t-else="">
+                    <div class="card card-custom border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fa fa-paper-plane"></i> Form Pengumpulan Tugas</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="/my/assignment/submit" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="assignment_id" t-att-value="assignment.id"/>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Link URL (opsional)</label>
+                                    <input type="text" class="form-control" name="url_link" placeholder="https://github.com/... atau https://figma.com/..."/>
+                                    <small class="text-muted">Isi jika jawaban Anda berupa link.</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Unggah File</label>
+                                    <input type="file" class="form-control" name="attachments" multiple="multiple"/>
+                                    <small class="text-muted">Anda bisa memilih lebih dari satu file.</small>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fa fa-upload"></i> Kumpulkan Tugas
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </t>
             </div>
         </t>
     </template>
+
 </odoo>

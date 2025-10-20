@@ -9,6 +9,7 @@ except ImportError:
     qrcode = None
     logging.getLogger(__name__).warning("The 'qrcode' library is not installed. QR code generation will be disabled.")
 
+from odoo.exceptions import ValidationError
 from odoo import models, fields, api
 
 class OjtEventLink(models.Model):
@@ -30,9 +31,9 @@ class OjtEventLink(models.Model):
         string='Online Meeting URL',
         help="Override/shortcut for the meeting link. If empty, the link from the event will be used.")
 
-    title = fields.Char(string='Title', related='event_id.name', readonly=False)
-    date_start = fields.Datetime(string='Date Start', related='event_id.date_begin', readonly=False)
-    date_end = fields.Datetime(string='Date End', related='event_id.date_end', readonly=False)
+    title = fields.Char(string='Title', related='event_id.name', readonly=True)
+    date_start = fields.Datetime(string='Date Start', related='event_id.date_begin', readonly=True)
+    date_end = fields.Datetime(string='Date End', related='event_id.date_end', readonly=True)
     instructor_id = fields.Many2one('res.partner', string='Instructor / Speaker')
     notes = fields.Text(string='Notes')
     qr_code_image = fields.Binary("QR Code", compute='_compute_qr_code')
@@ -40,6 +41,13 @@ class OjtEventLink(models.Model):
     participant_count = fields.Integer(compute='_compute_related_counts')
     attendance_count = fields.Integer(compute='_compute_related_counts')
     assignment_count = fields.Integer(compute='_compute_related_counts')
+
+    @api.constrains('date_start', 'date_end')
+    def _check_dates(self):
+        for record in self:
+            if record.date_start and record.date_end and record.date_end < record.date_start:
+                raise ValidationError("Tanggal berakhir (Date End) tidak boleh sebelum tanggal mulai (Date Start)!")
+
 
     @api.depends('batch_id.participant_ids', 'event_id')
     def _compute_related_counts(self):
@@ -60,7 +68,7 @@ class OjtEventLink(models.Model):
             else:
                 rec.qr_code_image = False
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
         """ On creation, send a notification email to all participants of the batch. """
         new_event_link = super(OjtEventLink, self).create(vals)

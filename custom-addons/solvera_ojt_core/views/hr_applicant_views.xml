@@ -10,7 +10,8 @@
                     <button name="action_open_enroll_wizard"
                             string="Enroll to OJT"
                             type="object"
-                            class="oe_highlight"/>
+                            class="oe_highlight"
+                            invisible="portal_status != 'new'"/>
                 </xpath>
             </field>
         </record>

@@ -76,14 +76,6 @@
                                     </list>
                                 </field>
                             </page>
-                            <page string="Agenda/Events">
-                                <field name="event_link_ids">
-                                    <list>
-                                        <field name="event_id" />
-                                        <field name="is_mandatory" />
-                                    </list>
-                                </field>
-                            </page>
                             <page string="Description">
                                 <field name="description"/>
                             </page>

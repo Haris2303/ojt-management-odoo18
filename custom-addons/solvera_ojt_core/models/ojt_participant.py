@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+import logging
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 class OjtParticipant(models.Model):
     _name = 'ojt.participant'
     _description = 'OJT Participant'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'portal.mixin']
 
     name = fields.Char(string='Name', compute='_compute_name', store=True, index=True)
     
@@ -52,6 +56,74 @@ class OjtParticipant(models.Model):
     portal_token = fields.Char(string='Portal Access Token', index=True, copy=False)
     notes = fields.Text(string='Internal Notes')
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+
+    access_url = fields.Char(
+        'Portal URL', compute='_compute_access_url',
+        help='URL yang digunakan oleh pelanggan untuk mengakses record ini dari portal.')
+    
+    def _compute_access_url(self):
+        super(OjtParticipant, self)._compute_access_url()
+        for participant in self:
+            # INI KODE YANG LAMA/SALAH
+            participant.access_url = '/my/dashboard'
+
+    def write(self, vals):
+        # 1. Identifikasi peserta yang baru saja diberi nilai mentor
+        participants_to_notify = self.browse()
+        # Cek jika 'mentor_score' ada di dalam data yang diubah
+        if 'mentor_score' in vals and vals.get('mentor_score'):
+            # Ambil semua record dari 'self' yang sebelumnya belum punya nilai mentor
+            # Ini mencegah email terkirim lagi jika mentor hanya mengoreksi nilai.
+            participants_to_notify = self.filtered(lambda p: not p.mentor_score)
+
+        # 2. Lakukan operasi 'write' seperti biasa
+        res = super(OjtParticipant, self).write(vals)
+
+        # 3. KIRIM email HANYA untuk peserta yang sudah kita identifikasi
+        if participants_to_notify:
+            _logger.info(f"Terdeteksi {len(participants_to_notify)} peserta yang diberi nilai mentor. Mengirim notifikasi...")
+            participants_to_notify._send_mentor_score_notification()
+            
+        return res
+    
+    def _send_mentor_score_notification(self):
+        """Mengirim notifikasi email saat nilai dari mentor diberikan."""
+        template = self.env.ref('solvera_ojt_core.mail_template_mentor_score', raise_if_not_found=False)
+        if not template:
+            _logger.error("Template email 'mail_template_mentor_score' tidak ditemukan.")
+            return
+
+        for participant in self:
+            if participant.partner_id.email:
+                # Kita ingin link mengarah ke dashboard utama peserta
+                portal_url = participant.get_portal_url(query_string=f'participant_id={participant.id}')
+                
+                template_ctx = {'url_portal_dashboard': portal_url}
+                template.with_context(template_ctx).send_mail(
+                    participant.id,
+                    force_send=True
+                )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """
+        Override create untuk mencegah penambahan peserta ke batch yang terkunci.
+        """
+        for vals in vals_list:
+            if 'batch_id' in vals and vals['batch_id']:
+                # Ambil record batch berdasarkan ID yang diberikan
+                batch = self.env['ojt.batch'].browse(vals['batch_id'])
+                
+                # Periksa status batch
+                if batch.state in ['ongoing', 'done', 'cancel']:
+                    # Jika status terkunci, langsung gagalkan proses
+                    raise ValidationError(
+                        f"You cannot add new participants to the batch '{batch.name}' "
+                        f"because its status is '{batch.state}'."
+                    )
+                    
+        # Jika semua batch valid, lanjutkan proses pembuatan record
+        return super(OjtParticipant, self).create(vals_list)
     
     @api.depends('partner_id.name', 'batch_id.name')
     def _compute_name(self):
@@ -122,28 +194,21 @@ class OjtParticipant(models.Model):
         self.ensure_one()
         return {
             'name': 'Assignments', 'type': 'ir.actions.act_window', 'res_model': 'ojt.assignment.submit',
-            'view_mode': 'tree,form', 'domain': [('participant_id', '=', self.id)],
+            'view_mode': 'list,form', 'domain': [('participant_id', '=', self.id)],
         }
 
     def action_open_attendance(self):
         self.ensure_one()
         return {
             'name': 'Attendance', 'type': 'ir.actions.act_window', 'res_model': 'ojt.attendance',
-            'view_mode': 'tree,form', 'domain': [('participant_id', '=', self.id)],
+            'view_mode': 'list,form', 'domain': [('participant_id', '=', self.id)],
         }
 
     def action_open_certificates(self):
         self.ensure_one()
         return {
             'name': 'Certificates', 'type': 'ir.actions.act_window', 'res_model': 'ojt.certificate',
-            'view_mode': 'tree,form', 'domain': [('participant_id', '=', self.id)],
-        }
-        
-    def action_open_courses(self):
-        self.ensure_one()
-        return {
-            'name': 'eLearning Courses', 'type': 'ir.actions.act_window', 'res_model': 'slide.channel',
-            'view_mode': 'kanban,form', 'domain': [('id', 'in', self.course_ids.ids)],
+            'view_mode': 'list,form', 'domain': [('participant_id', '=', self.id)],
         }
 
     def action_open_survey_results(self):
