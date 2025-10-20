@@ -132,7 +132,7 @@
 
     <template id="portal_my_account_ojt_menu" name="My Account OJT Menu">
         <t t-call="portal.portal_layout">
-            <!-- <t t-if="ojt_count or application_count"> -->
+            <t t-if="ojt_count or application_count">
                 <div class="o_portal_category row g-2 mt-4">
                     
                     <!-- OJT Dashboard -->
@@ -179,7 +179,7 @@
                     </t>
 
                 </div>
-            <!-- </t> -->
+            </t>
         </t>
     </template>
 
