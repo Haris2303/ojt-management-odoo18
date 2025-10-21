@@ -7,8 +7,7 @@
             <div class="container pb-5">
                 
                 <!-- Header -->
-                <div class="text-center text-white mb-2 p-5 rounded-4 shadow-sm"
-                    style="background:linear-gradient(135deg,#007bff,#00b4d8);">
+                <div class="text-center text-white mb-2 p-5 rounded-4 shadow-sm bg-primary">
                     <h2>Selamat Datang, <strong><t t-esc="participant.partner_id.name"/></strong> 👋</h2>
                     <p class="lead">Batch: <strong><t t-esc="participant.batch_id.name"/></strong></p>
 

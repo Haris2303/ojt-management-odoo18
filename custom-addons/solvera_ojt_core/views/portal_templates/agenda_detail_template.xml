@@ -9,8 +9,8 @@
             <div class="container py-5">
                 <div t-if="meeting_link" class="text-center mb-4">
                     <a t-attf-href="/my/agenda/join/#{event_link.id}" target="_blank" 
-                    class="btn text-white px-4 py-2"
-                    style="background:linear-gradient(135deg,#007bff,#0056b3);border-radius:50px;box-shadow:0 3px 6px rgba(0,0,0,0.1);">
+                    class="btn text-white px-4 py-2 bg-primary"
+                    style="border-radius:50px;box-shadow:0 3px 6px rgba(0,0,0,0.1);">
                         <i class="fa fa-video-camera me-2"/> Join Online Meeting
                     </a>
                 </div>

@@ -156,11 +156,9 @@ class OjtBatch(models.Model):
     @api.depends('participant_ids.batch_id', 'event_link_ids.batch_id')
     def _compute_counts(self):
         for batch in self:
-            # batch.participant_count = len(batch.participant_ids)
             batch.participant_count = self.env['ojt.participant'].search_count(
                 [('batch_id', '=', batch.id)]
             )
-            # batch.event_link_count = len(batch.event_link_ids)
             batch.event_link_count = self.env['ojt.event.link'].search_count(
                 [('batch_id', '=', batch.id)]
             )

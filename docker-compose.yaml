@@ -5,6 +5,7 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=odoo
       - POSTGRES_PASSWORD=odoo
+      - ADMIN_PASSWD=admin
     volumes:
       - db-data:/var/lib/postgresql/data
   odoo:

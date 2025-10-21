@@ -5,7 +5,7 @@
             <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('Dashboard', '/my/dashboard'), (assignment.name, '#')]"/>
             
             <div class="container py-5">
-                <div class="assignment-header mb-4 p-4 rounded text-white" style="background:linear-gradient(135deg,#007bff,#00b4d8); box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+                <div class="assignment-header bg-primary mb-4 p-4 rounded text-white" style="box-shadow:0 4px 15px rgba(0,0,0,0.1);">
                     <h1 class="mb-2"><t t-esc="assignment.name"/></h1>
                     <p class="deadline mb-0">
                         <i class="fa fa-calendar"></i> Batas Waktu: 

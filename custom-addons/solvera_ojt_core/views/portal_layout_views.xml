@@ -6,9 +6,13 @@
         <field name="priority">99</field>
         <field name="arch" type="xml">
             <xpath expr="//div[@id='o_logout_divider']" position="before">
-                <a href="/my/dashboard" role="menuitem" class="dropdown-item ps-3">
-                    <i class="fa fa-fw fa-home me-1 small text-primary text-primary-emphasis"/> My Dashboard
-                </a>
+                <t t-if="request.env['ojt.participant'].sudo()
+                    .search_count([('partner_id', '=', request.env.user.partner_id.id), 
+                    ('state', 'in', ['active', 'completed'])]) > 0">
+                    <a href="/my/dashboard" role="menuitem" class="dropdown-item ps-3">
+                        <i class="fa fa-fw fa-home me-1 small text-primary text-primary-emphasis"/> My Dashboard
+                    </a>
+                </t>
             </xpath>
         </field>
     </record>

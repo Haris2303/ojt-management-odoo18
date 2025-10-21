@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
                 <list>
                     <field name="partner_id"/>
+                    <field name="applicant_email"/>
                     <field name="batch_id"/>
                     <field name="state"/>
                     <field name="score_avg"/>

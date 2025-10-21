@@ -12,6 +12,7 @@
     'version': '18.0.1.0.0',
     'depends': [
         'base',
+        'hr',
         'hr_recruitment',
         'event',
         'website_slides',
@@ -24,8 +25,8 @@
     'data': [
         'security/ojt_security.xml',
         'security/ir.model.access.csv',
+        'data/hr_recruitment_stage_data.xml',
         'data/ir_sequence.xml',
-        # 'data/cron.xml',
         'data/mail_templates/assignment_mail_templates.xml',
         'data/mail_templates/batch_mail_templates.xml',
         'data/mail_templates/certificate_mail_templates.xml',
@@ -45,7 +46,6 @@
         'wizard/hr_applicant_enroll_views.xml',
         'wizard/generate_certificates_wizard_views.xml',
         'report/report_actions.xml',
-        'report/ojt_certificate_report.xml',
         'report/certificate_templates.xml',
         'views/portal_layout_views.xml',
         'views/portal_templates/agenda_detail_template.xml',

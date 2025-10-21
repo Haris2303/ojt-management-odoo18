@@ -28,7 +28,7 @@
                                         </tr>
                                         <tr>
                                             <th>Tanggal Terbit</th>
-                                            <td><span t-esc="certificate.issued_on.strftime('%d %B %Y')"/></td>
+                                            <td><span t-esc="certificate.issued_date.strftime('%d %B %Y')"/></td>
                                         </tr>
                                         <tr>
                                             <th>Nilai Akhir / Grade</th>
@@ -56,11 +56,4 @@
             </div>
         </t>
     </template>
-
-    <record id="menu_ojt_programs" model="website.menu">
-        <field name="name">OJT Programs</field>
-        <field name="url">/ojt/programs</field>
-        <field name="parent_id" ref="website.main_menu"/>
-        <field name="sequence" type="int">50</field>
-    </record>
 </odoo>
