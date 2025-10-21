@@ -21,7 +21,6 @@ class CustomWebsiteHrRecruitment(WebsiteHrRecruitment):
             ], order='id desc', limit=1)
             
             if new_applicant and not new_applicant.partner_id:
-                # Jika user yang login belum punya partner, tautkan sekarang
                 if not request.env.user.partner_id:
                     request.env.user.partner_id = request.env['res.partner'].sudo().create({'name': request.env.user.name, 'email': request.env.user.login})
                 new_applicant.sudo().write({'partner_id': request.env.user.partner_id.id})

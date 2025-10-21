@@ -25,7 +25,7 @@
         <record id="ojt_group_coordinator" model="res.groups">
             <field name="name">Coordinator</field>
             <field name="category_id" ref="module_category_ojt"/>
-            <field name="implied_ids" eval="[(4, ref('ojt_group_mentor'))]"/>
+            <field name="implied_ids" eval="[(4, ref('ojt_group_viewer'))]"/>
             <field name="comment">Manage batches, link events, and generate certificates.</field>
         </record>
         

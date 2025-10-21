@@ -22,10 +22,15 @@
                         <span t-field="object.date_start" t-options='{"widget": "datetime"}'/>
                     </li>
 
-                    <t t-set="meeting_link" t-value="object.online_meeting_url or object.event_id.meeting_url"/>
-                    <li t-if="meeting_link">
+                    <t t-set="join_url" t-value="ctx.get('autolog_join_url')"/>
+
+                    <t t-if="not join_url">
+                        <t t-set="join_url" t-value="object.online_meeting_url or object.event_id.meeting_url"/>
+                    </t>
+
+                    <li t-if="join_url">
                         <strong>Link Meeting:</strong> 
-                        <a t-att-href="meeting_link">Klik di sini untuk bergabung</a>
+                        <a t-att-href="join_url">Klik di sini untuk bergabung</a>
                     </li>
                 </ul>
                 <p>

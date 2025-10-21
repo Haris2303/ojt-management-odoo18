@@ -6,8 +6,18 @@ class OjtAttendance(models.Model):
     _description = 'OJT Participant Attendance'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    event_link_id = fields.Many2one('ojt.event.link', string='Session', required=True, ondelete='cascade')
-    participant_id = fields.Many2one('ojt.participant', string='Participant', required=True, ondelete='cascade')
+    event_link_id = fields.Many2one(
+        'ojt.event.link', 
+        string='Session', 
+        required=True, 
+        ondelete='cascade'
+    )
+    participant_id = fields.Many2one(
+        'ojt.participant', 
+        string='Participant', 
+        required=True, 
+        ondelete='cascade'
+    )
     batch_id = fields.Many2one(
         'ojt.batch', string='OJT Batch', 
         related='event_link_id.batch_id', store=True)
@@ -46,3 +56,13 @@ class OjtAttendance(models.Model):
                 rec.duration_minutes = duration.total_seconds() / 60.0
             else:
                 rec.duration_minutes = 0.0
+
+    @api.constrains('participant_id', 'event_link_id')
+    def _check_unique_attendance(self):
+        for rec in self:
+            if self.search_count([
+                ('participant_id', '=', rec.participant_id.id),
+                ('event_link_id', '=', rec.event_link_id.id),
+                ('id', '!=', rec.id)
+            ]) > 0:
+                raise models.ValidationError("Peserta ini sudah tercatat absensinya untuk sesi ini.")

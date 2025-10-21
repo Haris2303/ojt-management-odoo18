@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-import logging
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
-
-_logger = logging.getLogger(__name__)
 
 class OjtParticipant(models.Model):
     _name = 'ojt.participant'
@@ -70,16 +67,13 @@ class OjtParticipant(models.Model):
         res = super(OjtParticipant, self).write(vals)
 
         if participants_to_notify:
-            _logger.info(f"Terdeteksi {len(participants_to_notify)} peserta yang diberi nilai mentor. Mengirim notifikasi...")
             participants_to_notify._send_mentor_score_notification()
             
         return res
     
     def _send_mentor_score_notification(self):
-        """Mengirim notifikasi email saat nilai dari mentor diberikan."""
         template = self.env.ref('solvera_ojt_core.mail_template_mentor_score', raise_if_not_found=False)
         if not template:
-            _logger.error("Template email 'mail_template_mentor_score' tidak ditemukan.")
             return
 
         for participant in self:
@@ -94,9 +88,6 @@ class OjtParticipant(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        """
-        Override create untuk mencegah penambahan peserta ke batch yang terkunci.
-        """
         for vals in vals_list:
             if 'batch_id' in vals and vals['batch_id']:
                 batch = self.env['ojt.batch'].browse(vals['batch_id'])

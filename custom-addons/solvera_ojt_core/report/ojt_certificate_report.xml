@@ -30,7 +30,7 @@
                         <p style="font-size: 16px; margin-top: 50px;">
                             Issued on: <span t-esc="doc.issue_date.strftime('%B %d, %Y')"/>
                         </p>
-                        </div>
+                    </div>
                 </t>
             </div>
         </t>

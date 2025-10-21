@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-import logging
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
-
-_logger = logging.getLogger(__name__)
 
 class OjtAssignmentSubmit(models.Model):
     _name = 'ojt.assignment.submit'
@@ -58,7 +55,6 @@ class OjtAssignmentSubmit(models.Model):
         res = super(OjtAssignmentSubmit, self).write(vals)
 
         if submissions_to_notify:
-            _logger.info(f"Terdeteksi {len(submissions_to_notify)} pengumpulan tugas yang dinilai. Mengirim notifikasi...")
             submissions_to_notify._send_scored_notification()
             
         return res
@@ -67,7 +63,6 @@ class OjtAssignmentSubmit(models.Model):
         """Mengirim notifikasi email saat tugas sudah dinilai."""
         template = self.env.ref('solvera_ojt_core.mail_template_assignment_scored', raise_if_not_found=False)
         if not template:
-            _logger.error("Template email 'mail_template_assignment_scored' tidak ditemukan.")
             return
 
         for submission in self:

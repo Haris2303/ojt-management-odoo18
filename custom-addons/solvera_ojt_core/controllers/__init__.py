@@ -1,3 +1,7 @@
 # -*- coding: utf-8 -*-
-from . import portal
-from . import website
+from . import ojt_assignment_controller
+from . import ojt_attendance_controller
+from . import ojt_batch_controller
+from . import ojt_certificate_controller
+from . import ojt_event_link_controller
+from . import website_hr_recruitment

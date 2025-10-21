@@ -1,21 +1,34 @@
 # -*- coding: utf-8 -*-
-import logging
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
-
-_logger = logging.getLogger(__name__)
 
 class OjtBatch(models.Model):
     _name = 'ojt.batch'
     _description = 'OJT Program Batch'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string='Batch Name', required=True, index=True, help='Name of the batch, e.g., OJT BA Oct 2025')
-    code = fields.Char(string='Batch Code', required=True, readonly=True, default='/', copy=False)
+    name = fields.Char(
+        string='Batch Name', 
+        required=True, 
+        index=True, 
+        help='Name of the batch, e.g., OJT BA Oct 2025'
+    )
+    code = fields.Char(
+        string='Batch Code', 
+        required=True, 
+        readonly=True, 
+        default='/', 
+        copy=False
+    )
     job_id = fields.Many2one('hr.job', string='Related Position', help="The job position this OJT is for.")
     description = fields.Html(string='Description')
     department_id = fields.Many2one('hr.department', string='Organizing Division')
-    mentor_ids = fields.Many2many('res.partner', 'ojt_batch_mentor_rel', 'batch_id', 'mentor_id', string='Mentors/Instructors')
+    mentor_ids = fields.Many2many(
+        'res.partner', 
+        'ojt_batch_mentor_rel', 
+        'batch_id', 'mentor_id', 
+        string='Mentors/Instructors'
+    )
 
     start_date = fields.Date(string='Start Date', required=True)
     end_date = fields.Date(string='End Date', required=True)
@@ -30,7 +43,9 @@ class OjtBatch(models.Model):
 
     participant_ids = fields.One2many('ojt.participant', 'batch_id', string='Participants')
     event_link_ids = fields.One2many('ojt.event.link', 'batch_id', string='Agenda/Events')
-    course_ids = fields.Many2many('slide.channel', 'ojt_batch_channel_rel', 'batch_id', 'channel_id', string='eLearning Courses')
+    course_ids = fields.Many2many('slide.channel', 
+                                    'ojt_batch_channel_rel', 'batch_id', 'channel_id', 
+                                    string='eLearning Courses')
     survey_id = fields.Many2one('survey.survey', string='Evaluation Survey')
 
     participant_count = fields.Integer(string="Participant Count", compute='_compute_counts')
@@ -50,7 +65,12 @@ class OjtBatch(models.Model):
     progress_ratio = fields.Float(string='Average Progress', compute='_compute_progress_ratio', store=True)
     
     color = fields.Integer(string='Color Index')
-    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company, required=True)
+    company_id = fields.Many2one(
+                    'res.company', 
+                    string='Company', 
+                    default=lambda self: self.env.company, 
+                    required=True
+                )
     active = fields.Boolean(default=True)
 
     @api.constrains('start_date', 'end_date')
@@ -133,11 +153,17 @@ class OjtBatch(models.Model):
                         force_send=True
                     )
 
-    @api.depends('participant_ids', 'event_link_ids')
+    @api.depends('participant_ids.batch_id', 'event_link_ids.batch_id')
     def _compute_counts(self):
         for batch in self:
-            batch.participant_count = len(batch.participant_ids)
-            batch.event_link_count = len(batch.event_link_ids)
+            # batch.participant_count = len(batch.participant_ids)
+            batch.participant_count = self.env['ojt.participant'].search_count(
+                [('batch_id', '=', batch.id)]
+            )
+            # batch.event_link_count = len(batch.event_link_ids)
+            batch.event_link_count = self.env['ojt.event.link'].search_count(
+                [('batch_id', '=', batch.id)]
+            )
 
     @api.depends('participant_ids.score_final')
     def _compute_progress_ratio(self):
@@ -182,20 +208,16 @@ class OjtBatch(models.Model):
 
     @api.model
     def _cron_update_batch_states(self):
-        _logger.info("Cron: Starting batch state update...")
         today = fields.Date.today()
         
         ongoing_batches_to_close = self.search([('state', '=', 'ongoing'), ('end_date', '<', today)])
         if ongoing_batches_to_close:
             ongoing_batches_to_close.action_done()
-            _logger.info(f"Cron: Moved {len(ongoing_batches_to_close)} batches to 'Done'.")
 
         recruiting_batches_to_start = self.search([('state', '=', 'recruit'), ('start_date', '<=', today)])
         if recruiting_batches_to_start:
             recruiting_batches_to_start.action_ongoing()
-            _logger.info(f"Cron: Moved {len(recruiting_batches_to_start)} batches to 'Ongoing'.")
         
-        _logger.info("Cron: Batch state update finished.")
         return True
 
     def action_open_generate_certificates_wizard(self):

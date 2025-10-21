@@ -5,7 +5,6 @@ access_ojt_batch_mentor,ojt.batch mentor access,model_ojt_batch,solvera_ojt_core
 access_ojt_batch_viewer,ojt.batch viewer access,model_ojt_batch,solvera_ojt_core.ojt_group_viewer,1,0,0,0
 
 access_ojt_participant_manager,ojt.participant manager access,model_ojt_participant,solvera_ojt_core.ojt_group_manager,1,1,1,1
-access_ojt_participant_coordinator,ojt.participant coordinator access,model_ojt_participant,solvera_ojt_core.ojt_group_coordinator,1,1,1,0
 access_ojt_participant_mentor,ojt.participant mentor access,model_ojt_participant,solvera_ojt_core.ojt_group_mentor,1,1,0,0
 access_ojt_participant_viewer,ojt.participant viewer access,model_ojt_participant,solvera_ojt_core.ojt_group_viewer,1,0,0,0
 

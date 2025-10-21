@@ -2,13 +2,11 @@
 import uuid
 import base64
 import io
-import logging
 
 try:
     import qrcode
 except ImportError:
     qrcode = None
-    logging.getLogger(__name__).warning("The 'qrcode' library is not installed. QR code generation will be disabled.")
 
 from odoo.exceptions import ValidationError
 from odoo import models, fields, api
@@ -91,17 +89,19 @@ class OjtEventLink(models.Model):
 
     @api.model_create_multi
     def create(self, vals):
-        """ On creation, send a notification email to all participants of the batch. """
         new_event_link = super(OjtEventLink, self).create(vals)
 
         template = self.env.ref('solvera_ojt_core.mail_template_new_ojt_agenda', raise_if_not_found=False)
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         
         if template and new_event_link.batch_id.participant_ids:
             for participant in new_event_link.batch_id.participant_ids:
                 if participant.partner_id.email:
+                    autolog_url = f"{base_url}/my/agenda/join/{new_event_link.id}"
                     email_context = {
                         'participant_name_placeholder': participant.partner_id.name,
                         'participant_email_placeholder': participant.partner_id.email,
+                        'autolog_join_url': autolog_url
                     }
                     template.with_context(**email_context).send_mail(new_event_link.id, force_send=True)
 
@@ -120,3 +120,44 @@ class OjtEventLink(models.Model):
             'name': 'Attendance Log', 'type': 'ir.actions.act_window', 'res_model': 'ojt.attendance',
             'view_mode': 'list,form', 'domain': [('event_link_id', '=', self.id)],
         }
+
+    def action_mark_absentees(self):
+        attendance = self.env['ojt.attendance']
+        for session in self:
+            if not session.batch_id:
+                continue
+
+            all_participants = session.batch_id.participant_ids
+
+            attended_participant_ids = attendance.search([
+                ('event_link_id', '=', session.id)
+            ]).mapped('participant_id')
+
+            absentee_participants = all_participants - attended_participant_ids
+
+            if not absentee_participants:
+                raise models.UserError("Semua peserta sudah tercatat kehadirannya.")
+
+            attendance_vals_list = []
+            for participant in absentee_participants:
+                attendance_vals_list.append({
+                    'participant_id': participant.id,
+                    'event_link_id': session.id,
+                    'batch_id': session.batch_id.id,
+                    'event_id': session.event_id.id,
+                    'check_in': fields.Datetime.now(),
+                    'presence': 'absent',
+                    'method': 'manual',
+                })
+
+            attendance.create(attendance_vals_list)
+
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Proses Selesai',
+                    'message': f'{len(absentee_participants)} peserta telah ditandai sebagai "Absent".',
+                    'type': 'success',
+                }
+            }
