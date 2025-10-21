@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Email OJT Batch Ongoing -->
+    <record id="mail_template_batch_ongoing" model="mail.template">
+        <field name="name">OJT Batch Started Notification</field>
+        <field name="model_id" ref="solvera_ojt_core.model_ojt_participant"/>
+        <field name="subject">Program OJT Anda Telah Dimulai: {{ object.batch_id.name }}</field>
+        <field name="email_to">{{ object.partner_id.email_formatted }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px;">
+                <p>Halo <span t-out="object.partner_id.name or ''"></span>,</p>
+                
+                <p>Kami ingin memberitahukan bahwa program OJT <strong><span t-field="object.batch_id.name"></span>
+                </strong> tempat Anda terdaftar telah resmi dimulai hari ini!</p>
+                
+                <p>
+                    Anda sekarang dapat mengakses semua materi, tugas, dan jadwal program melalui portal OJT Anda.
+                    Silakan login ke akun Anda untuk melihat detailnya.
+                </p>
+                
+                <div style="margin: 20px 0;">
+                    <a t-att-href="ctx.get('url_portal_batch')"
+                    style="background-color: #875A7B; padding: 10px 20px; color: #fff; text-decoration: none; border-radius: 5px;">
+                        Buka Dashboard OJT
+                    </a>
+                </div>
+
+                <p>Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi mentor atau admin program.</p>
+                
+                <p>Semoga sukses!</p>
+                <br/>
+                <p>Tim OJT</p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- Email OJT Batch Done -->
+    <record id="mail_template_batch_done" model="mail.template">
+        <field name="name">OJT Batch Finished Notification</field>
+        <field name="model_id" ref="solvera_ojt_core.model_ojt_participant"/>
+        <field name="subject">Selamat! Anda Telah Menyelesaikan Program OJT: {{ object.batch_id.name }}</field>
+        <field name="email_to">{{ object.partner_id.email_formatted }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px;">
+                <p>Halo <span t-out="object.partner_id.name or ''"></span>,</p>
+                
+                <p>
+                    Selamat! Kami ingin memberitahukan bahwa Anda telah berhasil menyelesaikan program OJT
+                    <strong><span t-field="object.batch_id.name"></span></strong>.
+                </p>
+                
+                <p>
+                    Kami mengucapkan terima kasih atas partisipasi, kerja keras, dan kontribusi Anda selama program berlangsung.
+                    Anda dapat melihat rekap nilai akhir dan mengunduh sertifikat (jika tersedia) melalui portal OJT Anda.
+                </p>
+                
+                <div style="margin: 20px 0;">
+                    <a t-att-href="ctx.get('url_portal_batch')"
+                        style="background-color: #875A7B; padding: 10px 20px; color: #fff; text-decoration: none; border-radius: 5px;">
+                        Lihat Hasil Akhir di Portal
+                    </a>
+                </div>
+
+                <p>Semoga ilmu dan pengalaman yang Anda dapatkan bermanfaat untuk karir Anda ke depannya.</p>
+                
+                <p>Sukses selalu!</p>
+                <br/>
+                <p>Tim OJT</p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- Email OJT Batch Suvery -->
+    <record id="mail_template_batch_survey" model="mail.template">
+        <field name="name">OJT: Survey Invitation</field>
+        <field name="model_id" ref="solvera_ojt_core.model_ojt_participant"/>
+        <field name="subject">Undangan Mengisi Survei Evaluasi: {{ object.batch_id.name }}</field>
+        <field name="email_to">{{ object.partner_id.email_formatted }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px;">
+                <p>Halo <span t-out="object.partner_id.name or ''"></span>,</p>
+                
+                <p>
+                    Sebagai bagian dari evaluasi program OJT <strong><span t-field="object.batch_id.name"></span></strong>, kami mohon kesediaan Anda untuk mengisi survei berikut:
+                </p>
+                
+                <p style="font-size: 14px; font-weight: bold;">
+                    "<span t-field="object.batch_id.survey_id.title"/>"
+                </p>
+                
+                <p>
+                    Masukan Anda sangat berharga bagi kami untuk perbaikan program di masa mendatang.
+                </p>
+                
+                <div style="margin: 20px 0;">
+                    <a t-att-href="ctx.get('url_survey')"
+                        style="background-color: #875A7B; padding: 10px 20px; color: #fff; text-decoration: none; border-radius: 5px;">
+                        Mulai Isi Survei
+                    </a>
+                </div>
+
+                <p>Terima kasih atas waktu dan partisipasi Anda.</p>
+                
+                <p>Hormat kami,</p>
+                <p>Tim OJT</p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+</odoo>

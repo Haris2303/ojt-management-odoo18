@@ -58,19 +58,27 @@ class OjtCertificate(models.Model):
         ('qr_token_uniq', 'unique(qr_token)', 'The QR Token must be unique!'),
     ]
 
-    @api.model
-    def create(self, vals):
-        if vals.get('participant_id'):
-            participant = self.env['ojt.participant'].browse(vals['participant_id'])
-            vals.update({
-                'final_score': participant.score_final,
-                'attendance_rate': participant.attendance_rate,
-            })
-
-        if vals.get('serial', '/') == '/':
-            vals['serial'] = self.env['ir.sequence'].next_by_code('ojt.certificate') or '/'
+    @api.model_create_multi
+    def create(self, vals_list):
+        participant_cache = {}
         
-        return super(OjtCertificate, self).create(vals)
+        for vals in vals_list:
+            if vals.get('participant_id'):
+                participant_id = vals['participant_id']
+                
+                if participant_id not in participant_cache:
+                    participant_cache[participant_id] = self.env['ojt.participant'].browse(participant_id)
+                
+                participant = participant_cache[participant_id]
+                vals.update({
+                    'final_score': participant.score_final,
+                    'attendance_rate': participant.attendance_rate,
+                })
+
+            if vals.get('serial', '/') == '/':
+                vals['serial'] = self.env['ir.sequence'].next_by_code('ojt.certificate') or '/'
+        
+        return super(OjtCertificate, self).create(vals_list)
 
     @api.depends('final_score')
     def _compute_grade(self):

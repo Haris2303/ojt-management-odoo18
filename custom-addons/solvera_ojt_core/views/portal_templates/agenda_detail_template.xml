@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_ojt_agenda_detail" name="OJT Agenda Detail">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('Dashboard', '/my/dashboard'), (event.name, '#')]"/>
+
+            <t t-set="meeting_link" t-value="event_link.online_meeting_url or event.meeting_url"/>
+
+            <div class="container py-5">
+                <div t-if="meeting_link" class="text-center mb-4">
+                    <a t-attf-href="/my/agenda/join/#{event_link.id}" target="_blank" 
+                    class="btn text-white px-4 py-2 bg-primary"
+                    style="border-radius:50px;box-shadow:0 3px 6px rgba(0,0,0,0.1);">
+                        <i class="fa fa-video-camera me-2"/> Join Online Meeting
+                    </a>
+                </div>
+
+                <div class="p-4 bg-white rounded-4 shadow-sm">
+                    <div class="pb-3 mb-3 border-bottom">
+                        <h1 class="fw-semibold"><t t-esc="event.name"/></h1>
+                        <p class="text-muted">
+                            <i class="fa fa-calendar me-1"/> 
+                            <t t-esc="event.date_begin.strftime('%d %B %Y')"/>,
+                            <t t-esc="event.date_begin.strftime('%H:%M')"/> - 
+                            <t t-esc="event.date_end.strftime('%H:%M')"/>
+                        </p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <h4 class="mb-3">Deskripsi Sesi</h4>
+                            <div t-field="event_link.notes" class="text-muted"/>
+                        </div>
+                        <div class="col-lg-4">
+                            <h4 class="mb-3">Detail</h4>
+                            <ul class="list-group">
+                                <li t-if="event.address_id" class="list-group-item bg-light rounded mb-2 border-0">
+                                    <strong>Lokasi:</strong><br/>
+                                    <address t-field="event.address_id" 
+                                            t-options='{"widget": "contact", "fields": ["address", "name"]}'/>
+                                </li>
+                                <li class="list-group-item bg-light rounded border-0">
+                                    <strong>Wajib Hadir:</strong>
+                                    <span t-if="event_link.is_mandatory" class="badge bg-success">Ya</span>
+                                    <span t-else="" class="badge bg-secondary">Tidak</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -18,6 +18,11 @@
         <field name="model">ojt.event.link</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_mark_absentees" string="Tandai yang Absen"
+                        type="object" class="oe_highlight"
+                        confirm="Anda yakin ingin menandai semua peserta yang belum hadir sebagai 'Absent'?"/>
+                </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_participants" type="object" class="oe_stat_button" icon="fa-users">

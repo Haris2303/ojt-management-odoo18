@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1"> 
+        <record id="stage_ojt_enrollment" model="hr.recruitment.stage">
+            <field name="name">OJT</field>
+            <field name="sequence">1</field> 
+            <field name="job_ids" eval="False"/> 
+            <field name="requirements">Proses pendaftaran peserta ke batch OJT.</field>
+        </record>
+    </data>
+</odoo>

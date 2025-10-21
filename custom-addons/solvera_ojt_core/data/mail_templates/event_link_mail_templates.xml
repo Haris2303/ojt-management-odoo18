@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Email new Agenda -->
+    <record id="mail_template_new_ojt_agenda" model="mail.template">
+        <field name="name">OJT: New Agenda Notification</field>
+        <field name="model_id" ref="solvera_ojt_core.model_ojt_event_link"/>
+        <field name="subject">Agenda Baru Ditambahkan: {{ object.event_id.name }}</field>
+        <field name="email_to">{{ ctx.get('participant_email_placeholder') }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family: sans-serif; font-size: 14px; color: #555;">
+                <p>Halo <strong><span t-out="ctx.get('participant_name_placeholder')"/></strong>,</p>
+                <p>
+                    Sebuah sesi agenda baru telah ditambahkan ke program OJT Anda
+                    (<strong><span t-out="object.batch_id.name"/></strong>).
+                </p>
+                <hr/>
+                <p><strong>Detail Sesi:</strong></p>
+                <ul>
+                    <li><strong>Topik:</strong> <span t-out="object.event_id.name"/></li>
+                    <li>
+                        <strong>Waktu:</strong>
+                        <span t-field="object.date_start" t-options='{"widget": "datetime"}'/>
+                    </li>
+
+                    <t t-set="join_url" t-value="ctx.get('autolog_join_url')"/>
+
+                    <t t-if="not join_url">
+                        <t t-set="join_url" t-value="object.online_meeting_url or object.event_id.meeting_url"/>
+                    </t>
+
+                    <li t-if="join_url">
+                        <strong>Link Meeting:</strong> 
+                        <a t-att-href="join_url">Klik di sini untuk bergabung</a>
+                    </li>
+                </ul>
+                <p>
+                    Mohon persiapkan diri Anda untuk sesi ini.
+                </p>
+                <p>Tim OJT</p>
+            </div>
+        </field>
+    </record>
+</odoo>

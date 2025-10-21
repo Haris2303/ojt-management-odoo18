@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_assignment_detail" name="OJT Assignment Detail">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs" t-value="[('My Account', '/my/home'), ('Dashboard', '/my/dashboard'), (assignment.name, '#')]"/>
+            
+            <div class="container py-5">
+                <div class="assignment-header bg-primary mb-4 p-4 rounded text-white" style="box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+                    <h1 class="mb-2"><t t-esc="assignment.name"/></h1>
+                    <p class="deadline mb-0">
+                        <i class="fa fa-calendar"></i> Batas Waktu: 
+                        <strong t-att-class="'text-warning' if not is_overdue else 'text-danger'">
+                            <t t-if="assignment.deadline" t-esc="assignment.deadline.strftime('%d %B %Y, %H:%M')"/>
+                        </strong>
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <h4 class="mb-2"><i class="fa fa-file-alt"></i> Deskripsi</h4>
+                    <div t-field="assignment.description" class="text-muted"/>
+                </div>
+
+                <t t-if="submission">
+                    <div class="card card-custom mb-4 border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fa fa-paper-plane"></i> Jawaban Anda</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                Anda telah mengirimkan tugas ini pada:
+                                <strong><t t-esc="submission.submitted_on.strftime('%d %B %Y, %H:%M')"/></strong>
+                                <span t-if="submission.late" class="badge bg-danger ms-2">TERLAMBAT</span>
+                            </p>
+
+                            <div t-if="submission.url_link" class="mb-3">
+                                <strong>Link URL:</strong> 
+                                <a t-att-href="submission.url_link" target="_blank" class="text-decoration-none text-primary">
+                                    <t t-esc="submission.url_link"/>
+                                </a>
+                            </div>
+
+                            <div t-if="attachment_data" class="mb-3">
+                                <strong>Lampiran:</strong>
+                                <ul class="list-unstyled mt-2">
+                                    <li t-foreach="attachment_data" t-as="att">
+                                        <a t-att-href="att['url']" class="text-decoration-none">
+                                            <i class="fa fa-download"></i> <t t-esc="att['name']"/>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <hr/>
+                            <h5 class="mb-3"><i class="fa fa-comment-dots"></i> Feedback &amp; Penilaian</h5>
+                            <t t-if="submission.state == 'scored'">
+                                <h5>Skor: <span class="text-primary"><t t-esc="submission.score"/></span> / <t t-esc="assignment.max_score"/></h5>
+                                <div t-field="submission.feedback"/>
+                            </t>
+                            <t t-else="">
+                                <p class="text-muted">Tugas Anda sedang menunggu penilaian dari mentor.</p>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+
+                <t t-else="">
+                    <div class="card card-custom border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fa fa-paper-plane"></i> Form Pengumpulan Tugas</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="/my/assignment/submit" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="assignment_id" t-att-value="assignment.id"/>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Link URL (opsional)</label>
+                                    <input type="text" class="form-control" name="url_link" placeholder="https://github.com/... atau https://figma.com/..."/>
+                                    <small class="text-muted">Isi jika jawaban Anda berupa link.</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Unggah File</label>
+                                    <input type="file" class="form-control" name="attachments" multiple="multiple"/>
+                                    <small class="text-muted">Anda bisa memilih lebih dari satu file.</small>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fa fa-upload"></i> Kumpulkan Tugas
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+</odoo>
